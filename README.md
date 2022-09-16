@@ -54,7 +54,7 @@ Some first-order AD codes use the reverse direction, or a blend of the two, but 
 only be done by nesting, which is suboptimal.
 
 If available, a natural way of implementing forward AD, used here, is to overload all the algebraic operators 
-'+','-','*','/'. 
+'+','-','*' and '/'. 
 The new laws reflect the properties of function differentiation, such as linearity. Multiplication between Taylor
 expansions consists in forming the truncated product of their polynomial parts 
 (equivalent on the partial derivatives to Leibniz's rule). 
@@ -171,7 +171,7 @@ IEEE, 1989. p. 1419-1423.
 [5] VALLI, Monica, ARMELLIN, Roberto, DI LIZIA, Pierluigi, et al. Nonlinear mapping of uncertainties in celestial mechanics. 
 *Journal of Guidance, Control, and Dynamics*, 2013, vol. 36, no 1, p. 48-63.
 
-[6] ARMELLIN, Roberto, DI LIZIA, Pierluigi, BERNELLI-ZAZZERA, Franco, et al. *Asteroid close encounters characterization 
+[6] ARMELLIN, Roberto, DI LIZIA, Pierluigi, BERNELLI-ZAZZERA, Franco, et al. Asteroid close encounters characterization 
 using differential algebra: the case of Apophis. 
 *Celestial Mechanics and Dynamical Astronomy*, 2010, vol. 107, no 4, p. 451-470.
 
