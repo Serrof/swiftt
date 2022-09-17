@@ -42,7 +42,7 @@ The polynomial coefficients of a Taylor expansion can be mapped straightforwardl
 underlying functions, and are even sometimes called the normalized derivatives. So computing a Taylor expansion at a
 given order is equivalent to the determination of all its derivatives at this order. 
 As a matter of fact, *swiftt* works with the normalized derivatives, as they are more intuitive to handle for some operations.
-The unvariate case has its own implementation as many simplifications occur.
+The univariate case has its own implementation as many simplifications occur.
 Note that for *n* variables and order *d*, the number of coefficients is *(n+d)!/n!d!*, which grows exponentially
 with both parameters. This limits in practise what values can be used.
 
@@ -62,13 +62,12 @@ expansions consists in forming the truncated product of their polynomial parts
 (equivalent on the partial derivatives to Leibniz's rule). 
 It is the bottleneck of the whole TDA, as it is a building brick for many other things 
 and unlike addition for example, it does not exhibit linear complexity w.r.t. the number of normalized derivatives. 
-For this reason, *swiftt* uses a look-up table and leverages on 
-Just In Time compilation via Numba for performance. As for division, it utilizes the reciprocal, which is treated
-like an intrinsic function, as described thereafter.
+For this reason, *swiftt* uses a look-up table and leverages on Just In Time compilation via Numba for performance. 
+As for division, it utilizes the reciprocal, which is treated like an intrinsic function, as described thereafter.
 
 Intrinsic functions e.g. *cos* use the composition (from the left) rule with univariate expansions. 
 Their Maclaurin series (Taylor series around zero) are well known. For other reference points, their coefficients
-follow a recursive formula. Note that for functions that are D-finite, like most of the intrinsic ones, 
+follow a recursive formula. Note that for functions that are D-finite [9], like most of the intrinsic ones, 
 this recursion is actually linear in *n*. When applicable, remarkable identities could be exploited instead, 
 but it is less computationally efficient and is not the path followed by *swiftt*.
 
@@ -101,8 +100,7 @@ The TDA in general also finds its use in uncertainty quantification, as the Tayl
 polynomial, local approximation. The classical TDA only keeps track of the remainder symbolically, but it can be 
 extended to the so-called Taylor Models [4] which include an interval enclosure of the error.
 ### Derivation and anti-derivation operators
-They have applications in numerical integration schemes, for example with the 
-so-called Picard integrator. 
+They have applications in numerical integration schemes, for example with the so-called Picard integrator. 
 ### Derivatives of inverse functions 
 Computing them is useful when solving implicit systems of equations or to swap 
 independent and dependent variables.
@@ -140,8 +138,8 @@ both for the theory and the practise of the TDA.
 As of version 1.7 of pyaudi, only the Taylor map inversion is exposed in Python, not the intermediate composition rules.
 
 ### Hipparchus (Java, and Python via Orekit)
-Named after the Greek scholar, [Hipparchus](https://github.com/Hipparchus-Math/hipparchus) is a generic mathematical library available in Java 1.8, originally forked 
-from Apache Commons Math. 
+Named after the Greek scholar, [Hipparchus](https://github.com/Hipparchus-Math/hipparchus) is a generic mathematical library 
+available in Java 1.8, originally forked from Apache Commons Math. 
 It is the main dependency of Orekit, a low-level astrodynamics library. 
 Because Java does not support operator overloading, the syntax for the TDA is a bit tedious, however the developers have
 already coded everything in the library with it on top of the original methods. 
@@ -185,3 +183,5 @@ using differential algebra: the case of Apophis.
 
 [8] BOYER, Carl B. *The history of the calculus and its conceptual development:(The concepts of the calculus).* 
 Courier Corporation, 1959.
+
+[9] LIPSHITZ, Leonard. D-finite power series. *Journal of algebra*, 1989, vol. 122, no 2, p. 353-373
