@@ -48,24 +48,32 @@ with both parameters. This limits in practise what values can be used.
 
 #### AD
 
-To the best of the author's knowledge, all implementations of the TDA dedicated to it, from Berz's proposal to the 
-present one, use a so-called forward approach.
+Automatic Differentiation consists in computing not just the nominal output(s) of a computer routine,
+but also its derivatives w.r.t. its inputs (so assuming continuous values) up to a given order, often equal to one.
+
+To the best of the author's knowledge, all dedicated implementations of multivariate, high-order AD
+(in the broader frame of the TDA), from Berz's first proposal to the present one, 
+use a so-called forward approach.
 This means that the computations start from the independent variables and work out the chain rule from there, 
-much as engineers learn how to calculate Taylor expansions by hand at university.  
+much as engineers learn how to calculate Taylor expansions by hand at university.
 Some first-order AD codes use the reverse direction in the chain rule, or a blend of the two, 
 but their extension to arbitrary order can only be done by nesting, which is suboptimal.
 
-If available, a natural way of implementing forward AD, used here, is to overload all the algebraic operators 
-'+','-','*' and '/'. 
-The new laws reflect the properties of function differentiation, such as linearity. Multiplication between Taylor
-expansions consists in forming the truncated product of their polynomial parts 
+If available, a natural way of implementing forward AD, used here, is to overload all the algebraic operators
+('+','-','*' and '/') as well as the intrinsic a.k.a. usual functions, such as cosine. 
+An elegant, double recursion exists to achieve this [10]. 
+However, it trades performance for conciseness and as such is not pursued by *swiftt*,
+which looks instead at explicit algorithms, also for pedagogical purposes.
+
+The overloaded algebraic operations reflect the properties of function differentiation, such as linearity. 
+Multiplication between Taylor expansions consists in forming the truncated product of their polynomial parts 
 (equivalent on the partial derivatives to Leibniz's rule). 
 It is the bottleneck of the whole TDA, as it is a building brick for many other things 
 and unlike addition for example, it does not exhibit linear complexity w.r.t. the number of normalized derivatives. 
 For this reason, *swiftt* uses a look-up table and leverages on Just In Time compilation via Numba for performance. 
 As for division, it utilizes the reciprocal, which is treated like an intrinsic function, as described thereafter.
 
-Intrinsic functions e.g. *cos* use the composition (from the left) rule with univariate expansions. 
+Intrinsic, scalar-valued functions use the composition (from the left) rule with univariate expansions. 
 Their Maclaurin series (Taylor series around zero) are well known. For other reference points, their coefficients
 follow a recursive formula. Note that for functions that are D-finite [9], like most of the intrinsic ones, 
 this recursion is actually linear in *n*. When applicable, remarkable identities could be exploited instead, 
@@ -74,11 +82,12 @@ but it is less computationally efficient and is not the path followed by *swiftt
 #### Derivation and anti-derivation operators
 The most common definition of the differentiation operator, used here, is the one that coincides with differentiation 
 on functions, but other are possible [5], as long as it follows Leibniz's law. 
-To be rigorous, the order of the remainder should be 
-lowered, but both options are available in *swift* for convenience. 
+To be rigorous, the order of the remainder should be lowered, 
+but both options are available in *swiftt* for convenience. 
 The anti-derivation is the "inverse" operation
 (but is really an inverse only in the univariate case, constant part aside).
-In *swift* it coincides with the classical integration on function. It uses the same look-up table for both operations.
+In *swiftt* it coincides with the classical integration on function. 
+Both operators use the same look-up table.
 
 #### Derivatives of inverse functions
 Berz coined the term "Taylor maps" for collections of Taylor expansions. If they have the same number of components
@@ -93,7 +102,7 @@ to Faa Di Bruno's formula.
 ## Some applications of the TDA
 ### Multivariate, high-order AD 
 It has applications whenever partial derivatives are needed, for example in numerical, local 
-optimization (although second-order derivatives are usually enough). It is a good compromise between symbolic 
+optimization (although usually only up to second-order). It is a good compromise between symbolic 
 calculations (that are costly) and finite differences methods (that are noisy). 
 
 The TDA in general also finds its use in uncertainty quantification, as the Taylor expansion of a function is its best 
@@ -107,7 +116,7 @@ independent and dependent variables.
 
 ## Origins of the TDA
 Note that the TDA is sometimes referred to simply as Differential Algebra in the literature. However, it 
-is not to be confused with the eponym branch of mathematics.
+is not to be confused with the eponym branch of mathematics which is broader.
 Some people even call it Jet Transport in the context of dynamical systems [7].
 
 The TDA was introduced in the seminal work of Berz in the late 1980s (see for example [1, 2]), 
@@ -185,3 +194,6 @@ using differential algebra: the case of Apophis.
 Courier Corporation, 1959.
 
 [9] LIPSHITZ, Leonard. D-finite power series. *Journal of algebra*, 1989, vol. 122, no 2, p. 353-373
+
+[10] KALMAN, Dan. Doubly recursive multivariate automatic differentiation. *Mathematics magazine*, 
+2002, vol. 75, no 3, p. 187-202.
