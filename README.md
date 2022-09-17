@@ -17,7 +17,7 @@ Automatic generation of the documentation is possible with [Sphinx](https://www.
 
 ## Features
 ### In a nutshell
-*swiftt* is a pure Python library implementing the so-called Taylor Differential Algebra (TDA), 
+*swiftt* is a pure-Python, object-oriented library implementing the so-called Taylor Differential Algebra (TDA), 
 as formalized by Berz [3, Chapter 2] and whose pillars are:
 
 - Multivariate Automatic Differentiation (AD) at arbitrary order.
@@ -27,7 +27,7 @@ as formalized by Berz [3, Chapter 2] and whose pillars are:
 All of the above is achieved by the manipulation of Taylor expansions a.k.a. Truncated Taylor Series, which *swiftt*
 does both for complex and real numbers. 
 
-The present library also has a few additional functionalities:
+The present library also has a few additional functionalities for the latter case:
 - An ordering between expansions, making ">" or "<" comparisons possible. 
 - Some integration schemes e.g. Runge-Kutta 4 compatible with AD, which are a must-have to apply it to dynamical systems.
 - Interval arithmetic, which is of interest to bound the polynomial part of a Taylor expansion.
@@ -36,12 +36,14 @@ The present library also has a few additional functionalities:
 
 #### Generalities
 
-The TDA is a computational tool, made possible by the power of modern machines yet also based on solid mathematical grounds.
+The TDA is a computational tool, made possible by the power of modern machines yet also based on solid mathematical grounds, 
+at the heart of which is Taylor's theorem.
 The polynomial coefficients of a Taylor expansion can be mapped straightforwardly to the partial derivatives of the 
 underlying functions, and are even sometimes called the normalized derivatives. So computing a Taylor expansion at a
-given order is equivalent to the determination of all its derivatives at this order.
+given order is equivalent to the determination of all its derivatives at this order. 
 As a matter of fact, *swiftt* works with the normalized derivatives, as they are more intuitive to handle for some operations.
-For *n* variables and order *d*, the number of coefficients is *(n+d)!/n!d!*, which grows exponentially
+The unvariate case has its own implementation as many simplifications occur.
+Note that for *n* variables and order *d*, the number of coefficients is *(n+d)!/n!d!*, which grows exponentially
 with both parameters. This limits in practise what values can be used.
 
 #### AD
@@ -50,8 +52,8 @@ To the best of the author's knowledge, all implementations of the TDA dedicated 
 present one, use a so-called forward approach.
 This means that the computations start from the independent variables and work out the chain rule from there, 
 much as engineers learn how to calculate Taylor expansions by hand at university.  
-Some first-order AD codes use the reverse direction, or a blend of the two, but their extension to arbitrary order can 
-only be done by nesting, which is suboptimal.
+Some first-order AD codes use the reverse direction in the chain rule, or a blend of the two, 
+but their extension to arbitrary order can only be done by nesting, which is suboptimal.
 
 If available, a natural way of implementing forward AD, used here, is to overload all the algebraic operators 
 '+','-','*' and '/'. 
@@ -82,8 +84,10 @@ In *swift* it coincides with the classical integration on function. It uses the 
 #### Derivatives of inverse functions
 Berz coined the term "Taylor maps" for collections of Taylor expansions. If they have the same number of components
 than of independent variables and the underlying Jacobian is invertible, then according to the inverse function theorem,
-the function itself has an inverse.
-Berz proposed a fixed-point, converging algorithm to obtain its Taylor map, which requires the composition rule. 
+the function itself has an inverse. In the univariate (and non-truncated) case, finding the derivatives of the inverse 
+is called series reversion.
+Berz proposed a fixed-point, always-converging algorithm to obtain the inverted Taylor map, 
+which requires the composition rule between compatible Taylor expansions. 
 The latter boils down to composition of the polynomial parts, equivalent on the partial derivatives 
 to Faa Di Bruno's formula. 
 
@@ -105,13 +109,14 @@ independent and dependent variables.
 
 ## Origins of the TDA
 Note that the TDA is sometimes referred to simply as Differential Algebra in the literature. However, it 
-is not to be confused with the eponym branch of mathematics. In some papers, it is instead called Jet Transport.
+is not to be confused with the eponym branch of mathematics.
+Some people even call it Jet Transport in the context of dynamical systems [7].
 
 The TDA was introduced in the seminal work of Berz in the late 1980s (see for example [1, 2]), 
 for application in particle physics. 
 As far as multivariate AD is concerned, it can be seen as a generalization both to multiple variables and high order of the 
 so-called dual numbers. In a way, the TDA is the pinnacle of calculus, whose invention is attributed independently to 
-Leibniz and Newton (although only rigorously defined much later by Cauchy [7]).
+Leibniz and Newton (although only rigorously defined much later by Cauchy [8]).
 
 Since the 2010s, some researchers have been applying the TDA to astrodynamics (often in collaboration with 
 Berz himself, cf. [6]), eventually leading the author to come across it.
@@ -175,5 +180,8 @@ IEEE, 1989. p. 1419-1423.
 using differential algebra: the case of Apophis. 
 *Celestial Mechanics and Dynamical Astronomy*, 2010, vol. 107, no 4, p. 451-470.
 
-[7] BOYER, Carl B. *The history of the calculus and its conceptual development:(The concepts of the calculus).* 
+[7] ALESSI, Elisa Maria, FARRES, Ariadna, VIEIRO, Arturo, et al. Jet transport and applications to NEOs. 
+*In : Proceedings of the 1st IAA Planetary Defense Conference*, Granada, Spain. 2009. p. 10-11.
+
+[8] BOYER, Carl B. *The history of the calculus and its conceptual development:(The concepts of the calculus).* 
 Courier Corporation, 1959.
