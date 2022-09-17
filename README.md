@@ -118,7 +118,7 @@ As far as multivariate AD is concerned, it can be seen as a generalization both 
 so-called dual numbers. In a way, the TDA is the pinnacle of calculus, whose invention is attributed independently to 
 Leibniz and Newton (although only rigorously defined much later by Cauchy [8]).
 
-Since the 2010s, some researchers have been applying the TDA to astrodynamics (often in collaboration with 
+Since the late 2000s, some researchers have been applying the TDA to astrodynamics (often in collaboration with 
 Berz himself, cf. [6]), eventually leading the author to come across it.
 
 ## Similar libraries
