@@ -4,7 +4,7 @@
 SoftWare for Intrusive Function's Taylor-series Truncation
 
 ## Author
-Romain Serra, PhD (serra.romain@gmail.com)
+Romain Serra, PhD (serra dot romain on gmail)
 
 ## Dependencies
 *swiftt* is a Python 3 library that only requires [NumPy](https://numpy.org/), 
@@ -28,7 +28,7 @@ All of the above is achieved by the manipulation of Taylor expansions a.k.a. Tru
 does both for complex and real numbers. 
 
 The present library also has a few additional functionalities for the latter case:
-- An ordering between expansions, making ">" or "<" comparisons possible. 
+- A total ordering between expansions, making ">" or "<" comparisons possible. 
 - Some integration schemes e.g. Runge-Kutta 4 compatible with AD, which are a must-have to apply it to dynamical systems.
 - Interval arithmetic, which is of interest to bound the polynomial part of a Taylor expansion.
 
@@ -39,9 +39,10 @@ The present library also has a few additional functionalities for the latter cas
 The TDA is a computational tool, made possible by the power of modern machines yet also based on solid mathematical grounds, 
 at the heart of which is Taylor's theorem.
 The polynomial coefficients of a Taylor expansion can be mapped straightforwardly to the partial derivatives of the 
-underlying functions, and are even sometimes called the normalized derivatives. So computing a Taylor expansion at a
-given order is equivalent to the determination of all its derivatives at this order. 
-As a matter of fact, *swiftt* works with the normalized derivatives, as they are more intuitive to handle for some operations.
+underlying functions with factorial terms, and are even sometimes called the normalized derivatives. 
+So computing a Taylor expansion at a given order is equivalent to the determination of all its derivatives at this order. 
+As a matter of fact, *swiftt* works with the normalized derivatives, 
+as they are more intuitive to handle for some operations.
 The univariate case has its own implementation as many simplifications occur.
 Note that for *n* variables and order *d*, the number of coefficients is *(n+d)!/n!d!*, which grows exponentially
 with both parameters. This limits in practise what values can be used.
@@ -67,27 +68,31 @@ which looks instead at explicit algorithms, also for pedagogical purposes.
 
 The overloaded algebraic operations reflect the properties of function differentiation, such as linearity. 
 Multiplication between Taylor expansions consists in forming the truncated product of their polynomial parts 
-(equivalent on the partial derivatives to Leibniz's rule). 
+(equivalent on the partial derivatives to the generalized Leibniz's rule). 
 It is the bottleneck of the whole TDA, as it is a building brick for many other things 
 and unlike addition for example, it does not exhibit linear complexity w.r.t. the number of normalized derivatives. 
 For this reason, *swiftt* uses a look-up table and leverages on Just In Time compilation via Numba for performance. 
 As for division, it utilizes the reciprocal, which is treated like an intrinsic function, as described thereafter.
 
-Intrinsic, scalar-valued functions use the composition (from the left) rule with univariate expansions. 
+Once the algebraic operators are available, intrinsic, scalar-valued functions can be dealt with by utilizing 
+the composition (from the left) rule with univariate expansions, compatible in practise with a Horner-like scheme. 
 Their Maclaurin series (Taylor series around zero) are well known. For other reference points, their coefficients
-follow a recursive formula. Note that for functions that are D-finite [9], like most of the intrinsic ones, 
-this recursion is actually linear in *n*. When applicable, remarkable identities could be exploited instead, 
+follow a recursive formula. Note that for functions that are holonomic a.k.a. D-finite [9], 
+like most of the intrinsic ones, this recursion is actually linear with polynomial coefficients in *n* 
+and can be found using the differential equation satisfied by the function. 
+When applicable, remarkable identities could be exploited instead, 
 but it is less computationally efficient and is not the path followed by *swiftt*.
+Note that an alternative to the composition with univariate truncated series, also applicable for the multiplication,
+is to use recursive formulas on the normalized derivatives themselves [11], but it remains unclear
+whether it is more performant or not.
 
 #### Derivation and anti-derivation operators
 The most common definition of the differentiation operator, used here, is the one that coincides with differentiation 
-on functions, but other are possible [5], as long as it follows Leibniz's law. 
-To be rigorous, the order of the remainder should be lowered, 
-but both options are available in *swiftt* for convenience. 
+on functions, even though other are possible [5], as long as it follows Leibniz's law. 
+To be rigorous, the order of the remainder should be lowered, but both options are available in *swiftt* for convenience. 
 The anti-derivation is the "inverse" operation
 (but is really an inverse only in the univariate case, constant part aside).
-In *swiftt* it coincides with the classical integration on function. 
-Both operators use the same look-up table.
+In *swiftt* it coincides with the classical integration on function. Both operators use the same look-up table.
 
 #### Derivatives of inverse functions
 Berz coined the term "Taylor maps" for collections of Taylor expansions. If they have the same number of components
@@ -100,6 +105,10 @@ The latter boils down to composition of the polynomial parts, equivalent on the 
 to Faa Di Bruno's formula. 
 
 ## Some applications of the TDA
+Reference [12] actually uses all three main features of the TDA within the same application 
+in data association for Space Surveillance & Tracking, more precisely computing the Probabilistic Distribution Function 
+of an optimal control cost used for maneuver-aware tracklet-to-orbit correlation.
+
 ### Multivariate, high-order AD 
 It has applications whenever partial derivatives are needed, for example in numerical, local 
 optimization (although usually only up to second-order). It is a good compromise between symbolic 
@@ -197,3 +206,9 @@ Courier Corporation, 1959.
 
 [10] KALMAN, Dan. Doubly recursive multivariate automatic differentiation. *Mathematics magazine*, 
 2002, vol. 75, no 3, p. 187-202.
+
+[11] NEIDINGER, Richard D. Efficient recurrence relations for univariate and multivariate Taylor series coefficients. 
+In : *Conference Publications*. American Institute of Mathematical Sciences, 2013. p. 587.
+
+[12] [SERRA, Romain, YANEZ, Carlos, DELANDE, Emmanuel. *Acta Astronautica*,
+2022, vol. 201, p. 526-532](https://authors.elsevier.com/c/1fuW2LWHF-uUq)

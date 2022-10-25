@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from typing import List, Iterable, Union
+from functools import total_ordering
 import math
 import numpy as np
 from swiftt.taylor.complex_multivar_taylor import TaylorExpansAbstract, ComplexMultivarTaylor
@@ -21,6 +22,7 @@ from swiftt.taylor.taylor_map import RealTaylorMap
 from swiftt.interval import Interval
 
 
+@total_ordering
 class RealMultivarTaylor(ComplexMultivarTaylor):
     """Class for Taylor expansions of real variables.
 
@@ -173,52 +175,6 @@ class RealMultivarTaylor(ComplexMultivarTaylor):
 
         # scalar case
         return self < self.create_const_expansion(other)
-
-    def __le__(self, other: Union["RealMultivarTaylor", float]) -> bool:
-        """Method enabling "<=" inequality comparison with other Taylor expansions and scalars.
-
-        Args:
-            other (Union[RealMultivarTaylor, float])): quantity to be compared with.
-
-        Returns:
-            bool: returns logical union of "=" and "<".
-
-        """
-        return not self.__gt__(other)
-
-    def __gt__(self, other: Union["RealMultivarTaylor", float]) -> bool:
-        """Method enabling ">" inequality comparison with other Taylor expansions and scalars.
-
-        Args:
-            other (Union[RealMultivarTaylor, float])): quantity to be compared with.
-
-        Returns:
-            bool: if the input is a Taylor expansion in same algebra, compares coefficients pairwise
-                (according to sorted monomials) until one is strictly greater than the other. If the input is a
-                scalar, performs comparison on Taylor expansion with only a constant part equal to it.
-
-        """
-        if isinstance(other, RealMultivarTaylor):
-            if self.is_in_same_algebra(other):
-                for coeff1, coeff2 in zip(self._coeff, other._coeff):
-                    if coeff1 != coeff2:
-                        return coeff1 > coeff2
-            return False
-
-        # scalar case
-        return self > self.create_const_expansion(other)
-
-    def __ge__(self, other: Union["RealMultivarTaylor", float]) -> bool:
-        """Method enabling ">=" inequality comparison with other Taylor expansions and scalars.
-
-        Args:
-            other (Union[RealMultivarTaylor, float])): quantity to be compared with.
-
-        Returns:
-            bool: returns logical union of "=" and ">".
-
-        """
-        return not self.__lt__(other)
 
     def __abs__(self) -> "RealMultivarTaylor":
         """Method implementation the absolute value for real Taylor expansions.
