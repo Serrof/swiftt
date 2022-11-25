@@ -74,17 +74,19 @@ and unlike addition for example, it does not exhibit linear complexity w.r.t. th
 For this reason, *swiftt* uses a look-up table and leverages on Just In Time compilation via Numba for performance. 
 As for division, it utilizes the reciprocal, which is treated like an intrinsic function, as described thereafter.
 
-Once the algebraic operators are available, intrinsic, scalar-valued functions can be dealt with by utilizing 
-the composition (from the left) rule with univariate expansions, compatible in practise with a Horner-like scheme. 
-Their Maclaurin series (Taylor series around zero) are well known. For other reference points, their coefficients
-follow a recursive formula. Note that for functions that are holonomic a.k.a. D-finite [9], 
+Once the algebraic operators are available, intrinsic, scalar-valued functions can be dealt with. 
+A brute force approach is to purely overload operators on their "standard" code e.g. with floats, when applicable. 
+A usually more effficient way is to use the composition (from the left) rule with univariate expansions,
+(compatible in practise with a Horner-like scheme), as their Maclaurin series (Taylor series around zero) are well known. 
+For other reference points, their coefficients follow a recursive formula. Note that for functions that are holonomic a.k.a. D-finite [9], 
 like most of the intrinsic ones, this recursion is actually linear with polynomial coefficients in *n* 
 and can be found using the differential equation satisfied by the function. 
-When applicable, remarkable identities could be exploited instead, 
+In some cases, relationships between intrisic functions like *tan = sin / cos* could be exploited instead, 
 but it is less computationally efficient and is not the path followed by *swiftt*.
-Note that an alternative to the composition with univariate truncated series, also applicable for the multiplication,
-is to use recursive formulas on the normalized derivatives themselves [11], but it remains unclear
-whether it is more performant or not.
+Note that an alternative, in a similar fashion to how multiplication is treated,
+is to use recursive formulas on the normalized derivatives themselves [11].
+It can outperform composition with univariate truncated series and is implemented here for some functions of univariate
+Taylor expansions.
 
 #### Derivation and anti-derivation operators
 The most common definition of the differentiation operator, used here, is the one that coincides with differentiation 
@@ -162,9 +164,9 @@ It is the main dependency of Orekit, a low-level astrodynamics library.
 Because Java does not support operator overloading, the syntax for the TDA is a bit tedious, however the developers have
 already coded everything in the library with it on top of the original methods. 
 
-Since its version 2.2, Hipparchus features Derivation and anti-derivation (a contribution of the author)
+Since its version 2.2, Hipparchus features derivation and anti-derivation (a contribution of the author)
 as well as composition and Taylor map inversion, making it a complete TDA emulator.
-The Python wrapper of Orekit 11.3 (to appear) is expected to include Hipparchus 2.2.
+The Python wrapper of Orekit embeds it.
 
 ### TaylorSeries (Julia)
  [TaylorSeries](https://github.com/JuliaDiff/TaylorSeries.jl) is used by its developers as the core dependency for some 

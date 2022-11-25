@@ -169,6 +169,118 @@ class ComplexUnivarTaylor(ComplexMultivarTaylor):
         coeff = self.pow2_univar(self._coeff, self.half_order + 1)
         return self.create_expansion_with_coeff(coeff)
 
+    def __truediv__(self, other) -> "ComplexUnivarTaylor":
+        if isinstance(other, self.__class__):
+            new_coeff = self._div_expansion(self._coeff, other._coeff)
+            divided = self.create_expansion_with_coeff(new_coeff)
+            return divided
+
+        # scalar case
+        return self * (1. / other)
+
+    @staticmethod
+    @njit(cache=True)
+    def _div_expansion(coeff: np.ndarray, coeff_other: np.ndarray) -> np.ndarray:
+        """Method computing the coefficients of an expansion divided by another from their respective coefficients.
+        Uses (univariate) recursive formula from Neidinger 2013.
+
+        Args:
+            coeff (numpy.ndarray): first set of coefficients.
+            coeff_other (numpy.ndarray): second set of coefficients.
+
+        Returns:
+            numpy.ndarray: coefficients corresponding to expansion obtained by dividing first expansion by second one.
+
+        """
+        divided_coeff = coeff / coeff_other[0]
+        flipped = np.flip(coeff_other)
+        for i in range(1, coeff.shape[0]):
+            divided_coeff[i] -= divided_coeff[:i].dot(flipped[-i-1:-1]) / coeff_other[0]
+        return divided_coeff
+
+    def reciprocal(self) -> "TaylorExpansAbstract":
+        coeff_one = np.zeros(self._dim_alg)
+        coeff_one[0] = 1.
+        new_coeff = self._div_expansion(coeff_one, self._coeff)
+        return self.create_expansion_with_coeff(new_coeff)
+
+    def exp(self) -> "ComplexUnivarTaylor":
+        first_term = self._exp_cst(self._coeff[0])  # this presents from having the method static
+        preprocessed_coeff = first_term * self._coeff
+        preprocessed_coeff[0] = first_term
+        return self.create_expansion_with_coeff(self._exp_expansion(self._coeff, preprocessed_coeff))
+
+    @staticmethod
+    @njit(cache=True)
+    def _exp_expansion(coeff: np.ndarray, preprocessed_coeff: np.ndarray) -> np.ndarray:
+        """Method computing the coefficients of the exponential of an expansion from their coefficients.
+        Uses (univariate) recursive formula from Neidinger 2013.
+
+        Args:
+            coeff (numpy.ndarray): expansion's coefficients.
+            preprocessed_coeff (numpy.ndarray): coefficients with some pre-computations done.
+
+        Returns:
+            numpy.ndarray: coefficients corresponding to the exponential of the expansion.
+
+        """
+        integers = np.arange(1., coeff.shape[0] + 1., 1.)
+        for i in range(2, coeff.shape[0]):
+            preprocessed_coeff[i] += (coeff[1:i] * integers[:i-1]).dot(preprocessed_coeff[i-1:0:-1]) / float(i)
+        return preprocessed_coeff
+
+    def log(self) -> "ComplexUnivarTaylor":
+        first_term = self._log_cst(self._coeff[0])  # this presents from having the method static
+        preprocessed_coeff = self._coeff / self._coeff[0]
+        preprocessed_coeff[0] = first_term
+        return self.create_expansion_with_coeff(self._log_expansion(self._coeff, preprocessed_coeff))
+
+    @staticmethod
+    @njit(cache=True)
+    def _log_expansion(coeff: np.ndarray, preprocessed_coeff: np.ndarray) -> np.ndarray:
+        """Method computing the coefficients of the natural logarithm of an expansion from their coefficients.
+        Uses (univariate) recursive formula from Neidinger 2013.
+
+        Args:
+            coeff (numpy.ndarray): expansion's coefficients.
+            preprocessed_coeff (numpy.ndarray): coefficients with some pre-computations done.
+
+        Returns:
+            numpy.ndarray: coefficients corresponding to the logarithm of the expansion.
+
+        """
+        integers = np.arange(1., coeff.shape[0] + 1., 1.)
+        scaled_coeff = coeff / coeff[0]
+        for i in range(2, coeff.shape[0]):
+            preprocessed_coeff[i] -= (preprocessed_coeff[1:i] * integers[:i-1]).dot(scaled_coeff[i-1:0:-1]) / float(i)
+        return preprocessed_coeff
+
+    def sqrt(self) -> "ComplexUnivarTaylor":
+        first_term = self._sqrt_cst(self._coeff[0])  # this presents from having the method static
+        preprocessed_coeff = self._coeff / (2. * first_term)
+        preprocessed_coeff[0] = first_term
+        return self.create_expansion_with_coeff(self._sqrt_expansion(self._coeff, preprocessed_coeff))
+
+    @staticmethod
+    @njit(cache=True)
+    def _sqrt_expansion(coeff: np.ndarray, preprocessed_coeff: np.ndarray) -> np.ndarray:
+        """Method computing the coefficients of the square root of an expansion from their coefficients.
+        Uses (univariate) recursive formula from Neidinger 2013.
+
+        Args:
+            coeff (numpy.ndarray): expansion's coefficients.
+            preprocessed_coeff (numpy.ndarray): coefficients with some pre-computations done.
+
+        Returns:
+            numpy.ndarray: coefficients corresponding to the square root of the expansion.
+
+        """
+        integers = np.arange(1., coeff.shape[0] + 1., 1.)
+        for i in range(2, coeff.shape[0]):
+            preprocessed_coeff[i] -= (preprocessed_coeff[1:i] * integers[:i-1]).dot(preprocessed_coeff[i-1:0:-1]) / \
+                                     (float(i) * preprocessed_coeff[0])
+        return preprocessed_coeff
+
     def __call__(self, *args, **kwargs):
         """Method for calling the Taylor expansion. Wraps several possibilities: evaluation and composition with another
         expansion.
