@@ -65,7 +65,6 @@ def algebra_dim(n_var: int, order: int) -> int:
 def mapping_monom(n_var: int, order: int) -> Dict[Tuple[int, ...], int]:
     """Memoized method to build mapping between the indices of the polynomial coefficients and the monomials.
     It assumes that the initial order of a dictionary is kept, which is only the case for Python 3.6 or newer.
-    It raises an error if called for univariate expansions as it is not needed in that case.
 
     Args:
         n_var (int): number of variables.
@@ -74,6 +73,9 @@ def mapping_monom(n_var: int, order: int) -> Dict[Tuple[int, ...], int]:
     Returns:
         Dict[Tuple[int, ...], int]: mapping where keys are the monomials (tuple of order for each variable)
             and values are the polynomial coefficients' indices.
+
+    Raises:
+        ValueError: if called for univariate expansions as it is not needed in that case.
 
     """
 
@@ -111,7 +113,6 @@ def mapping_monom(n_var: int, order: int) -> Dict[Tuple[int, ...], int]:
 @lru_cache(maxsize=_lru_cache_maxsize)
 def deriv_table(n_var: int, order: int) -> np.ndarray:
     """Memoized method to build differentiation/integration table for given order and number of variables.
-    It raises an error if called for univariate expansions as it is not needed in that case.
 
     Args:
         n_var (int): number of variables.
@@ -119,6 +120,9 @@ def deriv_table(n_var: int, order: int) -> np.ndarray:
 
     Returns:
         numpy.ndarray: differentiation/integration table.
+
+    Raises:
+        ValueError: if called for univariate expansions as it is not needed in that case.
 
     """
 
@@ -143,7 +147,6 @@ def mul_table(n_var: int, order: int) -> List[List[int]]:
     corresponding to a monomial M as ordered in the mapping with the coefficients, the elements are the indices of the
     monomials obtained when multiplying M with all the monomials before M in the map. There is no row for monomials
     x_i**order as it is known that only the monomial 1 can be multiplied with them.
-    It raises an error if called for univariate expansions as it is not needed in that case.
 
     Args:
         n_var (int): number of variables.
@@ -151,6 +154,9 @@ def mul_table(n_var: int, order: int) -> List[List[int]]:
 
     Returns:
         List[List[int]]: multiplication table.
+
+    Raises:
+        ValueError: if called for univariate expansions as it is not needed in that case.
 
     """
 
@@ -182,7 +188,6 @@ def mul_table(n_var: int, order: int) -> List[List[int]]:
 @lru_cache(maxsize=_lru_cache_maxsize)
 def flat_mul_table(n_var: int, order: int) -> np.ndarray:
     """Memoized method to flattened algebra's multiplication table.
-    It raises an error if called for univariate expansions as it is not needed in that case.
 
     Args:
         n_var (int): number of variables.
@@ -190,6 +195,9 @@ def flat_mul_table(n_var: int, order: int) -> np.ndarray:
 
     Returns:
         numpy.ndarray: flattened multiplication table.
+
+    Raises:
+        ValueError: if called for univariate expansions as it is not needed in that case.
 
     """
     return np.hstack(mul_table(n_var, order))

@@ -185,8 +185,8 @@ class ComplexUnivarTaylor(ComplexMultivarTaylor):
         Uses (univariate) recursive formula from Neidinger 2013.
 
         Args:
-            coeff (numpy.ndarray): first set of coefficients.
-            coeff_other (numpy.ndarray): second set of coefficients.
+            coeff (numpy.ndarray): first set of coefficients from the numerator.
+            coeff_other (numpy.ndarray): second set of coefficients from the denominator.
 
         Returns:
             numpy.ndarray: coefficients corresponding to expansion obtained by dividing first expansion by second one.
@@ -199,10 +199,28 @@ class ComplexUnivarTaylor(ComplexMultivarTaylor):
         return divided_coeff
 
     def reciprocal(self) -> "TaylorExpansAbstract":
-        coeff_one = np.zeros(self._dim_alg)
-        coeff_one[0] = 1.
-        new_coeff = self._div_expansion(coeff_one, self._coeff)
+        new_coeff = self._reciprocal_univar(self._coeff)
         return self.create_expansion_with_coeff(new_coeff)
+
+    @staticmethod
+    @njit(cache=True)
+    def _reciprocal_univar(coeff: np.ndarray) -> np.ndarray:
+        """Method computing the coefficients of the reciprocal (multiplicative inverse) of an expansion.
+        Uses (univariate) recursive formula from Neidinger 2013.
+
+        Args:
+            coeff (numpy.ndarray): set of coefficients from the original expansion.
+
+        Returns:
+            numpy.ndarray: coefficients corresponding to reciprocal.
+
+        """
+        reciprocal_coeff = np.zeros(len(coeff))
+        reciprocal_coeff[0] = 1. / coeff[0]
+        flipped = np.flip(coeff)
+        for i in range(1, coeff.shape[0]):
+            reciprocal_coeff[i] = -reciprocal_coeff[:i].dot(flipped[-i-1:-1]) / coeff[0]
+        return reciprocal_coeff
 
     def exp(self) -> "ComplexUnivarTaylor":
         first_term = self._exp_cst(self._coeff[0])  # this presents from having the method static
