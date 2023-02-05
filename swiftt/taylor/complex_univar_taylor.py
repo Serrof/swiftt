@@ -1,5 +1,5 @@
 # complex_univar_taylor.py: class implementing Taylor expansions of a unique complex variable
-# Copyright 2022 Romain Serra
+# Copyright 2022-2023 Romain Serra
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ class ComplexUnivarTaylor(ComplexMultivarTaylor):
         if isinstance(other, ComplexUnivarTaylor):
 
             if self.is_in_same_algebra(other):
-                multiplied_coeff = self._mul_expansion(other)
+                multiplied_coeff = self.mul_univar(self._coeff, other._coeff)
                 return self.create_expansion_with_coeff(multiplied_coeff)
 
             raise ValueError("Expansions to be multiplied are not from the same algebra")
@@ -94,8 +94,7 @@ class ComplexUnivarTaylor(ComplexMultivarTaylor):
     @njit(cache=True)
     def mul_univar(coeff: np.ndarray, other_coeff: np.ndarray) -> np.ndarray:
         """Static method transforming two series of coefficients into the coefficients of the product of univariate
-        Taylor expansions. It emulates the polynomial product and the truncation at the same time. Method is static so
-        that it can be replaced by faster C code if applicable.
+        Taylor expansions. It emulates the polynomial product and the truncation at the same time.
 
         Args:
             coeff (numpy.ndarray): first set of coefficients.
@@ -115,24 +114,11 @@ class ComplexUnivarTaylor(ComplexMultivarTaylor):
 
         return multiplied_coeff
 
-    def _mul_expansion(self, other: "ComplexUnivarTaylor") -> np.ndarray:
-        """Wrapper to static method on coefficients to multiply univariate expansion.
-
-        Args:
-            other (ComplexUnivarTaylor): Taylor expansion to be multiplied with.
-
-        Returns:
-            numpy.ndarray: coefficients of product of Taylor expansions.
-
-        """
-        return self.mul_univar(self._coeff, other._coeff)
-
     @staticmethod
     @njit(cache=True)
     def pow2_univar(coeff: np.ndarray, half_order: int) -> np.ndarray:
         """Static method transforming coefficients into the coefficients of the square of a univariate
-        Taylor expansion. It emulates the polynomial product and the truncation at the same time. Method is static so
-        that it can be replaced by faster C code if applicable.
+        Taylor expansion. It emulates the polynomial product and the truncation at the same time.
 
         Args:
             coeff (numpy.ndarray): first set of coefficients.
@@ -193,12 +179,12 @@ class ComplexUnivarTaylor(ComplexMultivarTaylor):
 
         """
         divided_coeff = coeff / coeff_other[0]
-        flipped = np.flip(coeff_other)
+        flipped = np.flip(coeff_other) / coeff_other[0]
         for i in range(1, coeff.shape[0]):
-            divided_coeff[i] -= divided_coeff[:i].dot(flipped[-i-1:-1]) / coeff_other[0]
+            divided_coeff[i] -= divided_coeff[:i].dot(flipped[-i-1:-1])
         return divided_coeff
 
-    def reciprocal(self) -> "TaylorExpansAbstract":
+    def reciprocal(self) -> "ComplexUnivarTaylor":
         new_coeff = self._reciprocal_univar(self._coeff)
         return self.create_expansion_with_coeff(new_coeff)
 
@@ -215,15 +201,15 @@ class ComplexUnivarTaylor(ComplexMultivarTaylor):
             numpy.ndarray: coefficients corresponding to reciprocal.
 
         """
-        reciprocal_coeff = np.zeros(len(coeff))
+        reciprocal_coeff = np.empty(len(coeff))
         reciprocal_coeff[0] = 1. / coeff[0]
-        flipped = np.flip(coeff)
+        inter = -np.flip(coeff) / coeff[0]
         for i in range(1, coeff.shape[0]):
-            reciprocal_coeff[i] = -reciprocal_coeff[:i].dot(flipped[-i-1:-1]) / coeff[0]
+            reciprocal_coeff[i] = reciprocal_coeff[:i].dot(inter[-i-1:-1])
         return reciprocal_coeff
 
     def exp(self) -> "ComplexUnivarTaylor":
-        first_term = self._exp_cst(self._coeff[0])  # this presents from having the method static
+        first_term = self._exp_cst(self._coeff[0])  # this prevents from having the method static
         preprocessed_coeff = first_term * self._coeff
         preprocessed_coeff[0] = first_term
         return self.create_expansion_with_coeff(self._exp_expansion(self._coeff, preprocessed_coeff))
@@ -248,7 +234,7 @@ class ComplexUnivarTaylor(ComplexMultivarTaylor):
         return preprocessed_coeff
 
     def log(self) -> "ComplexUnivarTaylor":
-        first_term = self._log_cst(self._coeff[0])  # this presents from having the method static
+        first_term = self._log_cst(self._coeff[0])  # this prevents from having the method static
         preprocessed_coeff = self._coeff / self._coeff[0]
         preprocessed_coeff[0] = first_term
         return self.create_expansion_with_coeff(self._log_expansion(self._coeff, preprocessed_coeff))
@@ -274,7 +260,7 @@ class ComplexUnivarTaylor(ComplexMultivarTaylor):
         return preprocessed_coeff
 
     def sqrt(self) -> "ComplexUnivarTaylor":
-        first_term = self._sqrt_cst(self._coeff[0])  # this presents from having the method static
+        first_term = self._sqrt_cst(self._coeff[0])  # this prevents from having the method static
         preprocessed_coeff = self._coeff / (2. * first_term)
         preprocessed_coeff[0] = first_term
         return self.create_expansion_with_coeff(self._sqrt_expansion(self._coeff, preprocessed_coeff))
@@ -293,10 +279,10 @@ class ComplexUnivarTaylor(ComplexMultivarTaylor):
             numpy.ndarray: coefficients corresponding to the square root of the expansion.
 
         """
-        integers = np.arange(1., coeff.shape[0] + 1., 1.)
+        inter = np.arange(1., coeff.shape[0] + 1., 1.) / preprocessed_coeff[0]
         for i in range(2, coeff.shape[0]):
-            preprocessed_coeff[i] -= (preprocessed_coeff[1:i] * integers[:i-1]).dot(preprocessed_coeff[i-1:0:-1]) / \
-                                     (float(i) * preprocessed_coeff[0])
+            preprocessed_coeff[i] -= (preprocessed_coeff[1:i] * inter[:i-1]).dot(preprocessed_coeff[i-1:0:-1]) / \
+                                     float(i)
         return preprocessed_coeff
 
     def __call__(self, *args, **kwargs):

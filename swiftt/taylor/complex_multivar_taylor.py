@@ -1,5 +1,5 @@
 # complex_multivar_taylor.py: class implementing Taylor expansions of multiple complex variables
-# Copyright 2022 Romain Serra
+# Copyright 2022-2023 Romain Serra
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -575,8 +575,7 @@ class ComplexMultivarTaylor(TaylorExpansAbstract):
     def mul_multivar(coeff: np.ndarray, other_coeff: np.ndarray, square_ind: np.ndarray,
                      table_mul: np.ndarray, indices_mul: np.ndarray) -> np.ndarray:
         """Static method transforming two series of coefficients into the coefficients of the product of multivariate
-        Taylor expansions. It emulates the polynomial product and the truncation at the same time. Method is static so
-        that it can be replaced by faster C code if applicable.
+        Taylor expansions. It emulates the polynomial product and the truncation at the same time.
 
         Args:
             coeff (numpy.ndarray): first set of coefficients.
@@ -604,19 +603,6 @@ class ComplexMultivarTaylor(TaylorExpansAbstract):
 
         return multiplied_coeff
 
-    def _mul_expansion(self, other: "ComplexMultivarTaylor") -> np.ndarray:
-        """Wrapper to static method on coefficients to multiply multivariate expansion.
-
-        Args:
-            other (ComplexMultivarTaylor): Taylor expansion to be multiplied with.
-
-        Returns:
-            numpy.ndarray: coefficients of product of Taylor expansions.
-
-        """
-        return self.mul_multivar(self._coeff, other._coeff, self.get_square_indices(),
-                                 self.get_flat_table_mul(), self.get_indices_mul())
-
     def __mul__(self, other) -> "ComplexMultivarTaylor":
         """Method defining right-hand side multiplication. It works for the external multiplication i.e. with scalars
         and for the internal one, that is between expansions.
@@ -632,7 +618,8 @@ class ComplexMultivarTaylor(TaylorExpansAbstract):
         if isinstance(other, ComplexMultivarTaylor):
 
             try:
-                multiplied_coeff = self._mul_expansion(other)
+                multiplied_coeff = self.mul_multivar(self._coeff, other._coeff, self.get_square_indices(),
+                                                     self.get_flat_table_mul(), self.get_indices_mul())
                 return self.create_expansion_with_coeff(multiplied_coeff)
 
             except ValueError:
@@ -649,8 +636,7 @@ class ComplexMultivarTaylor(TaylorExpansAbstract):
     def pow2_multivar(coeff: np.ndarray, square_ind: np.ndarray,
                       table_mul: np.ndarray, indices_mul: np.ndarray) -> np.ndarray:
         """Static method transforming coefficients into the coefficients of the square of a multivariate
-        Taylor expansion. It emulates the polynomial product and the truncation at the same time. Method is static so
-        that it can be replaced by faster C code if applicable.
+        Taylor expansion. It emulates the polynomial product and the truncation at the same time.
 
         Args:
             coeff (numpy.ndarray): first set of coefficients.

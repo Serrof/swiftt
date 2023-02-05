@@ -1,5 +1,5 @@
 # taylor_map.py: range of classes implementing maps of Taylor expansion
-# Copyright 2022 Romain Serra
+# Copyright 2022-2023 Romain Serra
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -801,8 +801,7 @@ class ComplexTaylorMap(TaylorExpansAbstract, MapAbstract):
     def mul_map_expans(coeff_map: np.ndarray, other_coeff: np.ndarray, square_indices: np.ndarray,
                        table_mul: np.ndarray, indices_mul: np.ndarray) -> np.ndarray:
         """Static method transforming series of coefficients of a map and a single Taylor expansion into the
-        coefficients of the map from their multiplicative product. Method is static for just-in-time compiling
-        with Numba.
+        coefficients of the map from their multiplicative product.
 
         Args:
             coeff_map (numpy.ndarray): coefficients from the Taylor map.

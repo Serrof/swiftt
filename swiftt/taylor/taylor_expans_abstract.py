@@ -1,5 +1,5 @@
 # taylor_expans_abstract.py: abstract class for Taylor expansions
-# Copyright 2022 Romain Serra
+# Copyright 2022-2023 Romain Serra
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
