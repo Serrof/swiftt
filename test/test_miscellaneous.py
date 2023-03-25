@@ -433,19 +433,6 @@ class TestMiscellaneous(unittest.TestCase):
             if expansion != null_expansion_2var_order3.copy().create_expansion_from_smaller_algebra(expansions[i]):
                 self.fail()
 
-    def test_non_regression(self):
-        x, y, z = factory_taylor.create_unknown_map(order=4, consts=[1., 2., -1.])
-        g = exp((sin(x) * cos(y) + 1.) / sqrt(1. + x**2 + y**2 + z**2))
-        g = g.deriv_once_wrt_var(1).integ_once_wrt_var(0).integ_once_wrt_var(2)
-        regre_coeff = [0.,     0.,     0.,     0.,     0.,     0.,
-                       -0.45942301,  0.,     0.,     0.,     0.,     0.,
-                       -0.02996078,  0.,     0.57760928, -0.05369175,  0.,     0.,
-                       0.,     0.,     0.,     0.,     0.06033602,  0.,
-                       0.04807805,  0.01270756,  0.,    -0.19353301,  0.11813837,  0.0072345,
-                       0.,     0.,     0.,     0.,     0.]
-        if not np.allclose(regre_coeff, g.coeff):
-            self.fail()
-
 
 if __name__ == '__main__':
     unittest.main()

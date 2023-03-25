@@ -639,7 +639,7 @@ class ComplexMultivarTaylor(TaylorExpansAbstract):
         Taylor expansion. It emulates the polynomial product and the truncation at the same time.
 
         Args:
-            coeff (numpy.ndarray): first set of coefficients.
+            coeff (numpy.ndarray): set of coefficients.
             square_ind (numpy.ndarray): precomputed indices corresponding to monomials which are the square
                 of another monomial in the algebra.
             table_mul (np.ndarray): flattened algebra's multiplication table.
@@ -671,6 +671,90 @@ class ComplexMultivarTaylor(TaylorExpansAbstract):
         coeff = self.pow2_multivar(self._coeff, self.get_square_indices(), self.get_flat_table_mul(),
                                    self.get_indices_mul())
         return self.create_expansion_with_coeff(coeff)
+
+    @staticmethod
+    @njit(cache=True)
+    def reciprocal_multivar(coeff: np.ndarray, square_ind: np.ndarray,
+                            table_mul: np.ndarray, indices_mul: np.ndarray) -> np.ndarray:
+        """Static method transforming coefficients into the coefficients of the reciprocal of a multivariate
+        Taylor expansion.  Uses recursive formula from Neidinger 2013.
+
+        Args:
+            coeff (numpy.ndarray): set of coefficients.
+            square_ind (numpy.ndarray): precomputed indices corresponding to monomials which are the square
+                of another monomial in the algebra.
+            table_mul (np.ndarray): flattened algebra's multiplication table.
+            indices_mul (numpy.ndarray): algebra's multiplication indices.
+
+        Returns:
+            numpy.ndarray: coefficients corresponding to reciprocal.
+
+        """
+        new_coeff = np.zeros(len(coeff))
+        new_coeff[0] = 1. / coeff[0]
+        new_coeff[1:] = -coeff[1:] * (new_coeff[0] ** 2)
+        new_coeff[square_ind[1]] -= coeff[1] * new_coeff[1] * new_coeff[0]
+        slices = indices_mul[2:] - indices_mul[1:-1]
+        for i, (slice_index, el) in enumerate(zip(slices, coeff[2:]), 2):
+            if i < len(square_ind):
+                new_coeff[square_ind[i]] -= el * new_coeff[i] * new_coeff[0]
+            new_coeff[table_mul[indices_mul[i - 1] + 1:indices_mul[i]]] -= (new_coeff[i] * coeff[1:slice_index] +
+                                                                            el * new_coeff[1:slice_index]) * new_coeff[0]
+        return new_coeff
+
+    def reciprocal(self) -> "ComplexMultivarTaylor":
+        new_coeff = self.reciprocal_multivar(self._coeff, self.get_square_indices(),
+                                             self.get_flat_table_mul(), self.get_indices_mul())
+        return self.create_expansion_with_coeff(new_coeff)
+
+    @staticmethod
+    @njit(cache=True)
+    def division_multivar(coeff: np.ndarray, other_coeff: np.ndarray, square_ind: np.ndarray,
+                          table_mul: np.ndarray, indices_mul: np.ndarray) -> np.ndarray:
+        """Static method transforming coefficients of two multivariate Taylor expansions into the coefficients of their
+        ratio. Uses recursive formula from Neidinger 2013.
+
+        Args:
+            coeff (numpy.ndarray): set of coefficients for numerator.
+            other_coeff (numpy.ndarray): set of coefficients for denominator.
+            square_ind (numpy.ndarray): precomputed indices corresponding to monomials which are the square
+                of another monomial in the algebra.
+            table_mul (np.ndarray): flattened algebra's multiplication table.
+            indices_mul (numpy.ndarray): algebra's multiplication indices.
+
+        Returns:
+            numpy.ndarray: coefficients corresponding to division.
+
+        """
+        new_coeff = coeff / other_coeff[0]
+        new_coeff[1:] -= other_coeff[1:] * new_coeff[0] / other_coeff[0]
+        new_coeff[square_ind[1]] -= other_coeff[1] * new_coeff[1] / other_coeff[0]
+        slices = indices_mul[2:] - indices_mul[1:-1]
+        for i, (slice_index, el2) in enumerate(zip(slices, other_coeff[2:]), 2):
+            if i < len(square_ind):
+                new_coeff[square_ind[i]] -= el2 * new_coeff[i] / other_coeff[0]
+            new_coeff[table_mul[indices_mul[i - 1] + 1:indices_mul[i]]] -= (new_coeff[i] * other_coeff[1:slice_index] +
+                                                                            el2 * new_coeff[1:slice_index]) /\
+                                                                           other_coeff[0]
+        return new_coeff
+
+    def __truediv__(self, other: Union[Scalar, "ComplexMultivarTaylor"]) -> "ComplexMultivarTaylor":
+        if isinstance(other, self.__class__):
+            ratio_coeff = self.division_multivar(self._coeff, other._coeff, self.get_square_indices(),
+                                                 self.get_flat_table_mul(), self.get_indices_mul())
+            return self.create_expansion_with_coeff(ratio_coeff)
+
+        # scalar case
+        return self * (1. / other)
+
+    def __rtruediv__(self, other: Union[Scalar, "ComplexMultivarTaylor"]) -> "ComplexMultivarTaylor":
+        if isinstance(other, self.__class__):
+            ratio_coeff = self.division_multivar(other._coeff, self._coeff, self.get_square_indices(),
+                                                 self.get_flat_table_mul(), self.get_indices_mul())
+            return self.create_expansion_with_coeff(ratio_coeff)
+
+        # scalar case
+        return other * self.reciprocal()
 
     def rigorous_integ_once_wrt_var(self, index_var: int) -> "ComplexMultivarTaylor":
         """Method performing integration with respect to a given unknown variable. The integration constant is zero.
