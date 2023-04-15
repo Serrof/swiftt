@@ -72,9 +72,9 @@ Multiplication between Taylor expansions consists in forming the truncated produ
 It is the bottleneck of the whole TDA, as it is a building brick for many other things 
 and unlike addition for example, it does not exhibit linear complexity w.r.t. the number of normalized derivatives. 
 For this reason, *swiftt* uses a look-up table and leverages on Just In Time compilation via Numba for performance. 
-As for division, it utilizes the reciprocal, which is treated like an intrinsic function, as described thereafter.
+As for division, it
 
-Once the algebraic operators are available, intrinsic, scalar-valued functions can be dealt with. 
+Once some basic algebraic operators are available, intrinsic, scalar-valued functions can be dealt with, including divisio itself. 
 A brute force approach is to purely overload operators on their "standard" code e.g. with floats, when applicable. 
 A usually more effficient way is to use the composition (from the left) rule with univariate expansions,
 (compatible in practise with a Horner-like scheme), as their Maclaurin series (Taylor series around zero) are well known. 
@@ -85,7 +85,7 @@ In some cases, relationships between intrisic functions like *tan = sin / cos* c
 but it is less computationally efficient and is not the path followed by *swiftt*.
 Note that an alternative, in a similar fashion to how multiplication is treated,
 is to use recursive formulas on the normalized derivatives themselves [11].
-It can outperform composition with univariate truncated series and is implemented here for some functions of univariate
+It can outperform composition with univariate truncated series and is implemented here for some functions of
 Taylor expansions.
 
 #### Derivation and anti-derivation operators
