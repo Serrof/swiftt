@@ -304,9 +304,15 @@ class TaylorExpansAbstract(AlgebraicAbstract, metaclass=ABCMeta):
 
         # order of at least one
         is_int = isinstance(alpha, int)
-        if is_int and alpha > 1:
-            return self._pown(alpha)
-        if isinstance(alpha, float) or (is_int and alpha < 0):
+        if is_int:
+            if alpha < 0.:
+                return self._pown(-alpha).reciprocal()
+            if alpha > 1:
+                return self._pown(alpha)
+            if alpha == 1:
+                return self.copy()
+            return self.create_const_expansion(1.)  # alpha = 0
+        if isinstance(alpha, float):
             # compose with x -> x ** alpha
             const = self.const
             nilpo = self.get_nilpo_part() * (1. / const)
@@ -318,10 +324,6 @@ class TaylorExpansAbstract(AlgebraicAbstract, metaclass=ABCMeta):
                 powered *= nilpo
                 powered.const = el
             return powered * (const**alpha)
-        if is_int and alpha == 0:
-            return self.create_const_expansion(1.)
-        if is_int and alpha == 1:
-            return self.copy()
         raise ValueError("Wrong exponent")
 
     def reciprocal(self) -> "TaylorExpansAbstract":

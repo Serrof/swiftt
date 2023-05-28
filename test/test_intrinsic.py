@@ -100,8 +100,8 @@ class TestIntrinsic(unittest.TestCase):
         if not np.array_equal(coeff, [0., 1., 0., 1. / 6., 0., 1. / 120., 0.]):
             self.fail()
 
-    def test_cos_sin(self):
-        expansion1 = null_expansion_2var_order2.copy()
+    def _template_cos_sin(self, univar: bool):
+        expansion1 = factory_taylor.zero_expansion(1, 5) if univar else null_expansion_2var_order2.copy()
         coeff1 = [2., 3., 4., -5., -1., -3.]
         expansion1.coeff = coeff1
 
@@ -112,6 +112,12 @@ class TestIntrinsic(unittest.TestCase):
             self.fail()
         if not np.allclose(coeff2[1:], np.zeros(len(coeff2) - 1)):
             self.fail()
+
+    def test_cos_sin_univariate(self):
+        self._template_cos_sin(univar=True)
+
+    def test_cos_sin_bivariate(self):
+        self._template_cos_sin(univar=False)
 
     def test_asin0(self):
         expansion1 = factory_taylor.zero_expansion(1, 6)
@@ -135,8 +141,8 @@ class TestIntrinsic(unittest.TestCase):
         if not np.array_equal(coeff, [0., 1., 0., -1. / 3., 0., 0.2, 0.]):
             self.fail()
 
-    def test_sin_asin(self):
-        expansion = null_expansion_2var_order2.copy()
+    def _template_sin_asin(self, univar: bool):
+        expansion = factory_taylor.zero_expansion(1, 5) if univar else null_expansion_2var_order2.copy()
         coeff = [0.5, 3., 4., -5., -1., -3.]
         expansion.coeff = coeff
 
@@ -153,8 +159,14 @@ class TestIntrinsic(unittest.TestCase):
         if not np.allclose(coeff[1:], coeff2[1:]):
             self.fail()
 
-    def test_cos_acos(self):
-        expansion = null_expansion_2var_order2.copy()
+    def test_sin_asin_univariate(self):
+        self._template_sin_asin(univar=True)
+
+    def test_sin_asin_bivariate(self):
+        self._template_sin_asin(univar=False)
+
+    def _template_cos_acos(self, univar: bool):
+        expansion = factory_taylor.zero_expansion(1, 5) if univar else null_expansion_2var_order2.copy()
         coeff = [0.5, 3., 4., -5., -1., -3.]
         expansion.coeff = coeff
 
@@ -171,8 +183,14 @@ class TestIntrinsic(unittest.TestCase):
         if not np.allclose(coeff[1:], coeff2[1:]):
             self.fail()
 
-    def test_sinh_asinh(self):
-        expansion = null_expansion_2var_order2.copy()
+    def test_cos_acos_univariate(self):
+        self._template_cos_acos(univar=True)
+
+    def test_cos_acos_bivariate(self):
+        self._template_cos_acos(univar=False)
+
+    def _template_sinh_asinh(self, univar: bool):
+        expansion = factory_taylor.zero_expansion(1, 5) if univar else null_expansion_2var_order2.copy()
         coeff = [2., 3., 4., -5., -1., -3.]
         expansion.coeff = coeff
 
@@ -189,8 +207,14 @@ class TestIntrinsic(unittest.TestCase):
         if not np.allclose(coeff[1:], coeff2[1:]):
             self.fail()
 
-    def test_cosh_acosh(self):
-        expansion = null_expansion_2var_order2.copy()
+    def test_sinh_asinh_univariate(self):
+        self._template_sinh_asinh(univar=True)
+
+    def test_sinh_asinh_bivariate(self):
+        self._template_sinh_asinh(univar=False)
+
+    def _template_cosh_acosh(self, univar: bool):
+        expansion = factory_taylor.zero_expansion(1, 5) if univar else null_expansion_2var_order2.copy()
         coeff = [2., 3., 4., -5., -1., -3.]
         expansion.coeff = coeff
 
@@ -207,8 +231,14 @@ class TestIntrinsic(unittest.TestCase):
         if not np.allclose(coeff[1:], coeff2[1:]):
             self.fail()
 
-    def test_tan_atan(self):
-        expansion = null_expansion_2var_order2.copy()
+    def test_cosh_acosh_univariate(self):
+        self._template_cosh_acosh(univar=True)
+
+    def test_cosh_acosh_bivariate(self):
+        self._template_cosh_acosh(univar=False)
+
+    def _template_tan_atan(self, univar: bool):
+        expansion = factory_taylor.zero_expansion(1, 5) if univar else null_expansion_2var_order2.copy()
         coeff = [0.5, 3., 4., -5., -1., -3.]
         expansion.coeff = coeff
 
@@ -225,8 +255,14 @@ class TestIntrinsic(unittest.TestCase):
         if not np.allclose(coeff[1:], coeff2[1:]):
             self.fail()
 
-    def test_cosh_sinh(self):
-        expansion1 = null_expansion_2var_order2.copy()
+    def test_tan_atan_univariate(self):
+        self._template_tan_atan(univar=True)
+
+    def test_tan_atan_bivariate(self):
+        self._template_tan_atan(univar=False)
+
+    def _template_cosh_sinh(self, univar: bool):
+        expansion1 = factory_taylor.zero_expansion(1, 5) if univar else null_expansion_2var_order2.copy()
         coeff1 = [0.5, 3., 4., -5., -1., -3.]
         expansion1.coeff = coeff1
 
@@ -237,6 +273,12 @@ class TestIntrinsic(unittest.TestCase):
             self.fail()
         if not np.allclose(np.zeros(len(coeff2) - 1), coeff2[1:]):
             self.fail()
+
+    def test_cosh_sinh_univariate(self):
+        self._template_cosh_sinh(univar=True)
+
+    def test_cosh_sinh_bivariate(self):
+        self._template_cosh_sinh(univar=False)
 
     def test_cosh(self):
         expansion = factory_taylor.zero_expansion(1, 5)
@@ -344,8 +386,8 @@ class TestIntrinsic(unittest.TestCase):
         if not np.array_equal(coeff, [1., 0.5, -0.125, 0.0625]):
             self.fail()
 
-    def test_sqrt_sq(self):
-        expansion = factory_taylor.zero_expansion(1, 5)
+    def _template_sqrt_sq(self, univar: bool):
+        expansion = factory_taylor.zero_expansion(1, 5) if univar else null_expansion_2var_order2
         coeff = [0.5, 1.5, -4., 2., -1., 7.]
         expansion.coeff = coeff
 
@@ -364,6 +406,12 @@ class TestIntrinsic(unittest.TestCase):
             self.fail()
         if not np.allclose(coeff[1:], coeff2[1:]):
             self.fail()
+
+    def test_sqrt_sq_univariate(self):
+        self._template_sqrt_sq(univar=True)
+
+    def test_sqrt_sq_bivariate(self):
+        self._template_sqrt_sq(univar=False)
 
     def test_sqrt_exp_log_float(self):
         expansion = factory_taylor.zero_expansion(1, 5)
@@ -528,13 +576,13 @@ class TestIntrinsic(unittest.TestCase):
             self.fail()
 
     def _template_test_complex_versus_float(self, expans, expans_complex):
-        for func in (sqrt, exp, log, sinh, cosh, cos, sin, lambda x: x**2, lambda x: 1. / x):
+        for func in (sqrt, exp, log, sinh, cosh, cos, sin):
             eval_func = func(expans)
             eval_func_complex = func(expans_complex)
             if not np.array_equal(eval_func.coeff, np.real(eval_func_complex.coeff)):
                 self.fail()
 
-    def test_univar_complex_versus_float(self):
+    def test_univariate_complex_versus_float(self):
         nvar = 1
         order = 10
         expans = factory_taylor.zero_expansion(nvar, order=order)

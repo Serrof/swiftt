@@ -775,11 +775,11 @@ class ComplexMultivarTaylor(TaylorExpansAbstract):
 
         """
         slices = indices_mul[2:] - indices_mul[1:-1]
-        factor = 2. * preprocessed_coeff[0]
-        preprocessed_coeff[square_ind[1]] -= preprocessed_coeff[1]**2 / factor
+        factor = 1. / (2. * preprocessed_coeff[0])
+        preprocessed_coeff[square_ind[1]] -= preprocessed_coeff[1]**2 * factor
         for i, slice_index in enumerate(slices, 2):
             if i < len(square_ind):
-                preprocessed_coeff[square_ind[i]] -= preprocessed_coeff[i]**2 / factor
+                preprocessed_coeff[square_ind[i]] -= preprocessed_coeff[i]**2 * factor
             preprocessed_coeff[table_mul[indices_mul[i - 1] + 1:indices_mul[i]]] -= preprocessed_coeff[i] * \
                                                                                     preprocessed_coeff[1:slice_index] \
                                                                                     / preprocessed_coeff[0]

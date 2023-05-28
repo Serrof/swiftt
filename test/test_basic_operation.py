@@ -159,7 +159,7 @@ class TestBasicOperation(unittest.TestCase):
         if coeff[0] != 2. or coeff[1] != 11. or coeff[2] != -28. or coeff[3] != 57.:
             self.fail()
 
-    def test_div_real_univariate(self):
+    def test_div_scalar_univariate(self):
         expansion1 = factory_taylor.zero_expansion(n_var=1, order=3)
         coeff1 = [2., -3., 5., 4]
         expansion1.coeff = coeff1
@@ -186,21 +186,31 @@ class TestBasicOperation(unittest.TestCase):
         if coeff[0] != 2. or coeff[1] != -4. or coeff[2] != 8. or coeff[3] != -16.:
             self.fail()
 
-    def test_div_univariate(self):
-        expansion1 = factory_taylor.zero_expansion(1, 5)
-        coeff1 = [2., -3., 5., 4, 0., 1.]
+    def _template_div(self, univar: bool):
+        expansion1 = factory_taylor.zero_expansion(1, 9) if univar else null_expansion_2var_order3
+        coeff1 = [2., -3., 5., 4, 0., 1., -2., 6., -1., 0.]
         expansion1.coeff = coeff1
 
         expansion2 = expansion1 ** (-1)
 
-        div = 1. / expansion1
+        expansion3 = 1. / expansion1
 
-        if expansion2 != div:
+        expansion4 = expansion1.reciprocal()
+
+        if expansion2 != expansion3 or expansion2 != expansion4:
+            self.fail()
+        if expansion1 * expansion4 != expansion1.create_const_expansion(1.):
             self.fail()
 
-    def test_pown_univariate(self):
-        expansion1 = factory_taylor.zero_expansion(1, 5)
-        coeff1 = [2., -3., 5., 4, 0.5, 1.]
+    def test_div_univariate(self):
+        self._template_div(univar=True)
+
+    def test_div_bivariate(self):
+        self._template_div(univar=False)
+
+    def _template_pown(self, univar: bool):
+        expansion1 = factory_taylor.zero_expansion(1, 9) if univar else null_expansion_2var_order3
+        coeff1 = [2., -3., 5., 4, 0.5, 1., -2., 6., -1., 0.]
         expansion1.coeff = coeff1
 
         product = expansion1.copy()
@@ -209,22 +219,16 @@ class TestBasicOperation(unittest.TestCase):
             product *= expansion1
             if product != expansion2:
                 self.fail()
+
+    def test_pown_univariate(self):
+        self._template_pown(univar=True)
 
     def test_pown_bivariate(self):
-        expansion1 = null_expansion_2var_order2.copy()
-        coeff1 = [2., -3., 5., 4, 0.5, 1.]
-        expansion1.coeff = coeff1
+        self._template_pown(univar=False)
 
-        product = expansion1.copy()
-        for i in range(2, 6):
-            expansion2 = expansion1**i
-            product *= expansion1
-            if product != expansion2:
-                self.fail()
-
-    def test_pow_bivariate(self):
-        expansion1 = null_expansion_2var_order2.copy()
-        coeff1 = [2., -3., 5., 4, 0.5, 1.]
+    def _template_pow(self, univar: bool):
+        expansion1 = factory_taylor.zero_expansion(1, 9) if univar else null_expansion_2var_order3.copy()
+        coeff1 = [2., -3., 5., 4, 0.5, 1., -2., 6., -1., 0.]
         expansion1.coeff = coeff1
 
         product = expansion1.copy()
@@ -233,6 +237,45 @@ class TestBasicOperation(unittest.TestCase):
             product *= expansion1
             if product != expansion2:
                 self.fail()
+
+    def test_pow_univariate(self):
+        self._template_pow(univar=True)
+
+    def test_pow_bivariate(self):
+        self._template_pow(univar=False)
+
+    def _template_test_complex_versus_float(self, expans, expans_complex):
+        for func in (lambda x: x**2, lambda x: 1. / x):
+            eval_func = func(expans)
+            eval_func_complex = func(expans_complex)
+            if not np.array_equal(eval_func.coeff, np.real(eval_func_complex.coeff)):
+                self.fail()
+
+    def test_univar_complex_versus_float(self):
+        nvar = 1
+        order = 10
+        expans = factory_taylor.zero_expansion(nvar, order=order)
+        coeff = np.zeros(order + 1)
+        coeff[0] = coeff[1] = 1.
+        expans.coeff = coeff
+        expans_complex = factory_taylor.zero_expansion(nvar, order=order, dtype=complex)
+        coeff_complex = np.zeros(order + 1, dtype=complex)
+        coeff_complex[0] = coeff_complex[1] = 1.
+        expans_complex.coeff = coeff_complex
+        self._template_test_complex_versus_float(expans, expans_complex)
+
+    def test_multivar_complex_versus_float(self):
+        nvar = 4
+        order = 5
+        expans = factory_taylor.zero_expansion(nvar, order=order)
+        coeff = np.zeros(expans.dim_alg)
+        coeff[:order + 1] = 1.
+        expans.coeff = coeff
+        expans_complex = factory_taylor.zero_expansion(nvar, order=order, dtype=complex)
+        coeff_complex = np.zeros(expans.dim_alg, dtype=complex)
+        coeff_complex[:order + 1] = 1.
+        expans_complex.coeff = coeff_complex
+        self._template_test_complex_versus_float(expans, expans_complex)
 
     def test_lin_univariate(self):
         expansion1 = factory_taylor.zero_expansion(1, 5)

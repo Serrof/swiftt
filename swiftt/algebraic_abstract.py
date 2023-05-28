@@ -125,7 +125,7 @@ class AlgebraicAbstract(metaclass=ABCMeta):
         return self * self
 
     def _pown(self, power: int) -> "AlgebraicAbstract":
-        """Method to raise algebraic object at a power than is a natural integer greater or equal to two.
+        """Method to raise algebraic object at a power than is a natural integer greater or equal to one.
 
         Args:
             power (int): exponent.
@@ -139,12 +139,15 @@ class AlgebraicAbstract(metaclass=ABCMeta):
         if power == 3:
             return self.pow2() * self
 
-        half_power = int(power / 2)
-        if float(half_power) == power / 2.:
-            return self._pown(half_power).pow2()  # recursive call
+        if power > 3:
+            half_power = int(power / 2)
+            if float(half_power) == power / 2.:
+                return self._pown(half_power).pow2()  # recursive call
 
-        # exponent is odd
-        return self._pown(half_power).pow2() * self  # recursive call
+            # exponent is odd
+            return self._pown(half_power).pow2() * self  # recursive call
+
+        return self.copy()  # power = 1
 
     @abstractmethod
     def __pow__(self, power: Union[float, int], modulo: Optional[float] = None) -> "AlgebraicAbstract":
