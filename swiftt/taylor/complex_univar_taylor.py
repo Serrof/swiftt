@@ -201,7 +201,7 @@ class ComplexUnivarTaylor(ComplexMultivarTaylor):
             numpy.ndarray: coefficients corresponding to reciprocal.
 
         """
-        reciprocal_coeff = np.empty(len(coeff))
+        reciprocal_coeff = np.empty_like(coeff)
         reciprocal_coeff[0] = 1. / coeff[0]
         inter = -np.flip(coeff) / coeff[0]
         for i in range(1, coeff.shape[0]):
@@ -263,26 +263,24 @@ class ComplexUnivarTaylor(ComplexMultivarTaylor):
         first_term = self._sqrt_cst(self._coeff[0])  # this prevents from having the method static
         preprocessed_coeff = self._coeff / (2. * first_term)
         preprocessed_coeff[0] = first_term
-        return self.create_expansion_with_coeff(self._sqrt_expansion(self._coeff, preprocessed_coeff))
+        return self.create_expansion_with_coeff(self._sqrt_expansion(preprocessed_coeff))
 
     @staticmethod
     @njit(cache=True)
-    def _sqrt_expansion(coeff: np.ndarray, preprocessed_coeff: np.ndarray) -> np.ndarray:
+    def _sqrt_expansion(preprocessed_coeff: np.ndarray) -> np.ndarray:
         """Method computing the coefficients of the square root of an expansion from their coefficients.
         Uses (univariate) recursive formula from Neidinger 2013.
 
         Args:
-            coeff (numpy.ndarray): expansion's coefficients.
             preprocessed_coeff (numpy.ndarray): coefficients with some pre-computations done.
 
         Returns:
             numpy.ndarray: coefficients corresponding to the square root of the expansion.
 
         """
-        inter = np.arange(1., coeff.shape[0] + 1., 1.) / preprocessed_coeff[0]
-        for i in range(2, coeff.shape[0]):
-            preprocessed_coeff[i] -= (preprocessed_coeff[1:i] * inter[:i-1]).dot(preprocessed_coeff[i-1:0:-1]) / \
-                                     float(i)
+        factor = 2. * preprocessed_coeff[0]
+        for i in range(1, preprocessed_coeff.shape[0]):
+            preprocessed_coeff[i] -= preprocessed_coeff[1:i].dot(preprocessed_coeff[i-1:0:-1]) / factor
         return preprocessed_coeff
 
     def __call__(self, *args, **kwargs):

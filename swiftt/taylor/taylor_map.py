@@ -40,6 +40,7 @@ class ComplexTaylorMap(TaylorExpansAbstract, MapAbstract):
     _log_cst, _exp_cst = np.log, np.exp
     _cos_cst, _sin_cst = np.cos, np.sin
     _cosh_cst, _sinh_cst = np.cosh, np.sinh
+    _tan_cst, _tanh_cst = np.tan, np.tanh
 
     def __init__(self, expansions) -> None:
         """Constructor for Taylor maps.
@@ -423,7 +424,7 @@ class ComplexTaylorMap(TaylorExpansAbstract, MapAbstract):
 
         """
         prolonged = [self[0].prolong(new_order)]
-        new_coeff = np.zeros(prolonged[0].dim_alg)
+        new_coeff = np.zeros(prolonged[0].dim_alg, dtype=self._var_type)
         for i in range(1, self._len):
             new_coeff[:self.dim_alg] = np.array(self._coeff[i, :], dtype=self._var_type)
             prolonged.append(prolonged[0].create_expansion_with_coeff(new_coeff))
@@ -904,12 +905,6 @@ class ComplexTaylorMap(TaylorExpansAbstract, MapAbstract):
                 raise ValueError
 
         return self.__class__([self[0].create_expansion_with_coeff(new_coeff[i, :]) for i in range(0, len(other))])
-
-    def tan(self) -> "ComplexTaylorMap":
-        return ComplexTaylorMap(np.tan(self))
-
-    def tanh(self) -> "ComplexTaylorMap":
-        return ComplexTaylorMap(np.tanh(self))
 
 
 class RealTaylorMap(ComplexTaylorMap):

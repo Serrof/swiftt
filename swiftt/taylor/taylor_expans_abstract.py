@@ -892,9 +892,10 @@ class TaylorExpansAbstract(AlgebraicAbstract, metaclass=ABCMeta):
         return self.create_const_expansion(ch) if self.is_trivial() else self._c_s(self, 1., sh, ch)
 
     @staticmethod
-    def seq_tan_tanh(c: float, eps: float, order: int, tan_cst: Callable, tanh_cst: Callable) -> np.ndarray:
+    def seq_tan_tanh(c: Union[complex, float], eps: float, order: int, tan_cst: Callable,
+                     tanh_cst: Callable) -> np.ndarray:
         order_plus_one = order + 1
-        seq = np.empty(order_plus_one)
+        seq = np.empty(order_plus_one, dtype=c.__class__)
         seq[0] = tanh_cst(c) if eps == -1. else tan_cst(c)
         seq[1] = 1. + eps * seq[0] * seq[0]
         for i in range(2, order_plus_one):

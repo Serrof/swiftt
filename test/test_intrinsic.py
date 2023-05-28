@@ -31,7 +31,7 @@ def test_inverse_pow(power: float):
     return test_func_inverse(lambda x: x**power, lambda y: y**(1. / power), 2.)
 
 
-def test_map_intrinsic(func) -> bool:
+def test_map_intrinsic(func: Callable, tolerance: float = None) -> bool:
     expansion1 = null_expansion_2var_order2.copy()
     coeff1 = [0.5, -1., 4., 2., 5., 1.]
     expansion1.coeff = coeff1
@@ -42,9 +42,15 @@ def test_map_intrinsic(func) -> bool:
 
     map1 = taylor_map.RealTaylorMap([expansion1, expansion2])
     on_map = func(map1)
-    for el1, el2 in zip(map1, on_map):
-        if el2 != func(el1):
-            return False
+
+    if tolerance is None:
+        for el1, el2 in zip(map1, on_map):
+            if el2 != func(el1):
+                return False
+    else:
+        for el1, el2 in zip(map1, on_map):
+            if max(np.fabs((el2 - func(el1)).coeff)) > tolerance:
+                return False
     return True
 
 
@@ -521,6 +527,39 @@ class TestIntrinsic(unittest.TestCase):
         if not np.allclose(coeff1, coeff2):
             self.fail()
 
+    def _template_test_complex_versus_float(self, expans, expans_complex):
+        for func in (sqrt, exp, log, sinh, cosh, cos, sin, lambda x: x**2, lambda x: 1. / x):
+            eval_func = func(expans)
+            eval_func_complex = func(expans_complex)
+            if not np.array_equal(eval_func.coeff, np.real(eval_func_complex.coeff)):
+                self.fail()
+
+    def test_univar_complex_versus_float(self):
+        nvar = 1
+        order = 10
+        expans = factory_taylor.zero_expansion(nvar, order=order)
+        coeff = np.zeros(order + 1)
+        coeff[0] = coeff[1] = 1.
+        expans.coeff = coeff
+        expans_complex = factory_taylor.zero_expansion(nvar, order=order, dtype=complex)
+        coeff_complex = np.zeros(order + 1, dtype=complex)
+        coeff_complex[0] = coeff_complex[1] = 1.
+        expans_complex.coeff = coeff_complex
+        self._template_test_complex_versus_float(expans, expans_complex)
+
+    def test_multivar_complex_versus_float(self):
+        nvar = 4
+        order = 5
+        expans = factory_taylor.zero_expansion(nvar, order=order)
+        coeff = np.zeros(expans.dim_alg)
+        coeff[:order + 1] = 1.
+        expans.coeff = coeff
+        expans_complex = factory_taylor.zero_expansion(nvar, order=order, dtype=complex)
+        coeff_complex = np.zeros(expans.dim_alg, dtype=complex)
+        coeff_complex[:order + 1] = 1.
+        expans_complex.coeff = coeff_complex
+        self._template_test_complex_versus_float(expans, expans_complex)
+
     def test_inverse_exp(self):
         if not test_func_inverse(exp, log, 2.):
             return self.fail()
@@ -594,8 +633,12 @@ class TestIntrinsic(unittest.TestCase):
         if expansion1 % arg_mod != expansion1 - 6.:
             self.fail()
 
+    def test_map_reciprocal(self):
+        if not test_map_intrinsic(lambda x: 1. / x):
+            self.fail()
+
     def test_map_sqrt(self):
-        if not test_map_intrinsic(sqrt):
+        if not test_map_intrinsic(sqrt, tolerance=1e-13):
             self.fail()
 
     def test_map_exp(self):

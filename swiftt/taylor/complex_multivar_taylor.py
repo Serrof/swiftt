@@ -677,7 +677,7 @@ class ComplexMultivarTaylor(TaylorExpansAbstract):
     def reciprocal_multivar(coeff: np.ndarray, square_ind: np.ndarray,
                             table_mul: np.ndarray, indices_mul: np.ndarray) -> np.ndarray:
         """Static method transforming coefficients into the coefficients of the reciprocal of a multivariate
-        Taylor expansion.  Uses recursive formula from Neidinger 2013.
+        Taylor expansion. Uses recursive formula from Neidinger 2013.
 
         Args:
             coeff (numpy.ndarray): set of coefficients.
@@ -690,7 +690,7 @@ class ComplexMultivarTaylor(TaylorExpansAbstract):
             numpy.ndarray: coefficients corresponding to reciprocal.
 
         """
-        new_coeff = np.zeros(len(coeff))
+        new_coeff = np.zeros_like(coeff)
         new_coeff[0] = 1. / coeff[0]
         new_coeff[1:] = -coeff[1:] * (new_coeff[0] ** 2)
         new_coeff[square_ind[1]] -= coeff[1] * new_coeff[1] * new_coeff[0]
@@ -755,6 +755,43 @@ class ComplexMultivarTaylor(TaylorExpansAbstract):
 
         # scalar case
         return other * self.reciprocal()
+
+    @staticmethod
+    @njit(cache=True)
+    def sqrt_multivar(preprocessed_coeff: np.ndarray, square_ind: np.ndarray,
+                      table_mul: np.ndarray, indices_mul: np.ndarray) -> np.ndarray:
+        """Static method transforming coefficients into the coefficients of the square root of a multivariate
+        Taylor expansion. Uses recursive formula from Neidinger 2013.
+
+        Args:
+            preprocessed_coeff (numpy.ndarray): coefficients with some pre-computations done.
+            square_ind (numpy.ndarray): precomputed indices corresponding to monomials which are the square
+                of another monomial in the algebra.
+            table_mul (np.ndarray): flattened algebra's multiplication table.
+            indices_mul (numpy.ndarray): algebra's multiplication indices.
+
+        Returns:
+            numpy.ndarray: coefficients corresponding to square root.
+
+        """
+        slices = indices_mul[2:] - indices_mul[1:-1]
+        factor = 2. * preprocessed_coeff[0]
+        preprocessed_coeff[square_ind[1]] -= preprocessed_coeff[1]**2 / factor
+        for i, slice_index in enumerate(slices, 2):
+            if i < len(square_ind):
+                preprocessed_coeff[square_ind[i]] -= preprocessed_coeff[i]**2 / factor
+            preprocessed_coeff[table_mul[indices_mul[i - 1] + 1:indices_mul[i]]] -= preprocessed_coeff[i] * \
+                                                                                    preprocessed_coeff[1:slice_index] \
+                                                                                    / preprocessed_coeff[0]
+        return preprocessed_coeff
+
+    def sqrt(self) -> "ComplexMultivarTaylor":
+        sqrt_cst = self._sqrt_cst(self._coeff[0])
+        preprocessed_coeff = self._coeff / (2. * sqrt_cst)
+        preprocessed_coeff[0] = sqrt_cst
+        new_coeff = self.sqrt_multivar(preprocessed_coeff, self.get_square_indices(),
+                                       self.get_flat_table_mul(), self.get_indices_mul())
+        return self.create_expansion_with_coeff(new_coeff)
 
     def rigorous_integ_once_wrt_var(self, index_var: int) -> "ComplexMultivarTaylor":
         """Method performing integration with respect to a given unknown variable. The integration constant is zero.
