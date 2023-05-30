@@ -318,7 +318,7 @@ class TaylorExpansAbstract(AlgebraicAbstract, metaclass=ABCMeta):
             nilpo = self.get_nilpo_part() * (1. / const)
             terms = np.ones(self._order + 1)
             terms[1:] = np.cumprod([(alpha - i) / (i + 1) for i in range(0, self._order)])
-            powered = terms[-1] * nilpo
+            powered = nilpo * terms[-1]  # TODO: investigate why flipping terms does not work
             powered.const = terms[-2]
             for el in terms[-3::-1]:
                 powered *= nilpo

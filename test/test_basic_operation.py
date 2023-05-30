@@ -213,10 +213,11 @@ class TestBasicOperation(unittest.TestCase):
         coeff1 = [2., -3., 5., 4, 0.5, 1., -2., 6., -1., 0.]
         expansion1.coeff = coeff1
 
-        product = expansion1.copy()
-        for i in range(2, 6):
+        for i in range(4, 6):
+            product = expansion1.copy()
             expansion2 = expansion1**i
-            product *= expansion1
+            for __ in range(i - 1):
+                product *= expansion1
             if product != expansion2:
                 self.fail()
 
@@ -225,6 +226,23 @@ class TestBasicOperation(unittest.TestCase):
 
     def test_pown_bivariate(self):
         self._template_pown(univar=False)
+
+    def _template_pow3(self, univar: bool):
+        expansion1 = factory_taylor.zero_expansion(1, 9) if univar else null_expansion_2var_order3
+        coeff1 = [2., -3., 5., 4, 0.5, 1., -2., 6., -1., 0.]
+        expansion1.coeff = coeff1
+
+        product = expansion1**2
+        expansion2 = expansion1**3
+        product *= expansion1
+        if product != expansion2:
+            self.fail()
+
+    def test_pow3_univariate(self):
+        self._template_pow3(univar=True)
+
+    def test_pow3_bivariate(self):
+        self._template_pow3(univar=False)
 
     def _template_pow(self, univar: bool):
         expansion1 = factory_taylor.zero_expansion(1, 9) if univar else null_expansion_2var_order3.copy()

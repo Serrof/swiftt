@@ -208,6 +208,36 @@ class ComplexUnivarTaylor(ComplexMultivarTaylor):
             reciprocal_coeff[i] = reciprocal_coeff[:i].dot(inter[-i-1:-1])
         return reciprocal_coeff
 
+    def __pow__(self, power, modulo=None) -> "ComplexUnivarTaylor":
+        if float(power) == 2.:
+            return self.pow2()
+        else:
+            return self.create_expansion_with_coeff(self._pow_expansion(self._coeff, np.array([power])))
+
+    @staticmethod
+    @njit(cache=True)
+    def _pow_expansion(coeff: np.ndarray, power: np.ndarray) -> np.ndarray:
+        """Method computing the coefficients of the power of an expansion from their coefficients.
+        Uses (univariate) recursive formula from Neidinger 2013.
+
+        Args:
+            coeff (numpy.ndarray): expansion's coefficients.
+            power (numpy.ndarray): power stored in array for numba.
+
+        Returns:
+            numpy.ndarray: coefficients corresponding to the power of the expansion.
+
+        """
+        scaled_coeff = coeff / coeff[0]
+        power_cst = coeff[0] ** power[0]
+        power_coeff = scaled_coeff * (power[0] * power_cst)
+        power_coeff[0] = power_cst
+        integers = np.arange(1., coeff.shape[0] + 1., 1.)
+        for i in range(2, coeff.shape[0]):
+            power_coeff[i] += ((scaled_coeff[1:i] * integers[:i - 1]).dot(power_coeff[i - 1:0:-1]) * power[0]
+                               - (power_coeff[1:i] * integers[:i - 1]).dot(scaled_coeff[i - 1:0:-1])) / float(i)
+        return power_coeff
+
     def exp(self) -> "ComplexUnivarTaylor":
         first_term = self._exp_cst(self._coeff[0])  # this prevents from having the method static
         preprocessed_coeff = first_term * self._coeff

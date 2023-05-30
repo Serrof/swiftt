@@ -101,8 +101,8 @@ class TestIntrinsic(unittest.TestCase):
             self.fail()
 
     def _template_cos_sin(self, univar: bool):
-        expansion1 = factory_taylor.zero_expansion(1, 5) if univar else null_expansion_2var_order2.copy()
-        coeff1 = [2., 3., 4., -5., -1., -3.]
+        expansion1 = factory_taylor.zero_expansion(1, 9) if univar else null_expansion_2var_order3.copy()
+        coeff1 = [2., 3., 4., -5., -1., -3., -2., 6., -1., 0.]
         expansion1.coeff = coeff1
 
         expansion2 = cos(expansion1)**2 + sin(expansion1)**2
@@ -142,8 +142,8 @@ class TestIntrinsic(unittest.TestCase):
             self.fail()
 
     def _template_sin_asin(self, univar: bool):
-        expansion = factory_taylor.zero_expansion(1, 5) if univar else null_expansion_2var_order2.copy()
-        coeff = [0.5, 3., 4., -5., -1., -3.]
+        expansion = factory_taylor.zero_expansion(1, 9) if univar else null_expansion_2var_order3.copy()
+        coeff = [0.5, 3., 4., -5., -1., -3., -2., 6., -1., 0.]
         expansion.coeff = coeff
 
         expansion1 = asin(sin(expansion))
@@ -166,8 +166,8 @@ class TestIntrinsic(unittest.TestCase):
         self._template_sin_asin(univar=False)
 
     def _template_cos_acos(self, univar: bool):
-        expansion = factory_taylor.zero_expansion(1, 5) if univar else null_expansion_2var_order2.copy()
-        coeff = [0.5, 3., 4., -5., -1., -3.]
+        expansion = factory_taylor.zero_expansion(1, 9) if univar else null_expansion_2var_order3.copy()
+        coeff = [0.5, 3., 4., -5., -1., -3., -2., 6., -1., 0.]
         expansion.coeff = coeff
 
         expansion1 = acos(cos(expansion))
@@ -190,8 +190,8 @@ class TestIntrinsic(unittest.TestCase):
         self._template_cos_acos(univar=False)
 
     def _template_sinh_asinh(self, univar: bool):
-        expansion = factory_taylor.zero_expansion(1, 5) if univar else null_expansion_2var_order2.copy()
-        coeff = [2., 3., 4., -5., -1., -3.]
+        expansion = factory_taylor.zero_expansion(1, 9) if univar else null_expansion_2var_order3.copy()
+        coeff = [2., 3., 4., -5., -1., -3., -2., 6., -1., 0.]
         expansion.coeff = coeff
 
         expansion1 = asinh(sinh(expansion))
@@ -214,8 +214,8 @@ class TestIntrinsic(unittest.TestCase):
         self._template_sinh_asinh(univar=False)
 
     def _template_cosh_acosh(self, univar: bool):
-        expansion = factory_taylor.zero_expansion(1, 5) if univar else null_expansion_2var_order2.copy()
-        coeff = [2., 3., 4., -5., -1., -3.]
+        expansion = factory_taylor.zero_expansion(1, 9) if univar else null_expansion_2var_order3.copy()
+        coeff = [2., 3., 4., -5., -1., -3., -2., 6., -1., 0.]
         expansion.coeff = coeff
 
         expansion1 = acosh(cosh(expansion))
@@ -238,8 +238,8 @@ class TestIntrinsic(unittest.TestCase):
         self._template_cosh_acosh(univar=False)
 
     def _template_tan_atan(self, univar: bool):
-        expansion = factory_taylor.zero_expansion(1, 5) if univar else null_expansion_2var_order2.copy()
-        coeff = [0.5, 3., 4., -5., -1., -3.]
+        expansion = factory_taylor.zero_expansion(1, 9) if univar else null_expansion_2var_order3.copy()
+        coeff = [0.5, 3., 4., -5., -1., -3., -2., 6., -1., 0.]
         expansion.coeff = coeff
 
         expansion1 = atan(tan(expansion))
@@ -262,8 +262,8 @@ class TestIntrinsic(unittest.TestCase):
         self._template_tan_atan(univar=False)
 
     def _template_cosh_sinh(self, univar: bool):
-        expansion1 = factory_taylor.zero_expansion(1, 5) if univar else null_expansion_2var_order2.copy()
-        coeff1 = [0.5, 3., 4., -5., -1., -3.]
+        expansion1 = factory_taylor.zero_expansion(1, 9) if univar else null_expansion_2var_order3.copy()
+        coeff1 = [0.5, 3., 4., -5., -1., -3., -2., 6., -1., 0.]
         expansion1.coeff = coeff1
 
         expansion2 = cosh(expansion1)**2 - sinh(expansion1)**2
@@ -387,8 +387,8 @@ class TestIntrinsic(unittest.TestCase):
             self.fail()
 
     def _template_sqrt_sq(self, univar: bool):
-        expansion = factory_taylor.zero_expansion(1, 5) if univar else null_expansion_2var_order2
-        coeff = [0.5, 1.5, -4., 2., -1., 7.]
+        expansion = factory_taylor.zero_expansion(1, 9) if univar else null_expansion_2var_order3.copy()
+        coeff = [0.5, 1.5, -4., 2., -1., 7., -2., 6., -1., 0.]
         expansion.coeff = coeff
 
         expansion1 = sqrt(expansion**2)
@@ -576,7 +576,7 @@ class TestIntrinsic(unittest.TestCase):
             self.fail()
 
     def _template_test_complex_versus_float(self, expans, expans_complex):
-        for func in (sqrt, exp, log, sinh, cosh, cos, sin):
+        for func in (sqrt, exp, log, sinh, cosh, cos, sin, lambda x: x**1.5):
             eval_func = func(expans)
             eval_func_complex = func(expans_complex)
             if not np.array_equal(eval_func.coeff, np.real(eval_func_complex.coeff)):
@@ -679,6 +679,14 @@ class TestIntrinsic(unittest.TestCase):
 
         arg_mod = 3.
         if expansion1 % arg_mod != expansion1 - 6.:
+            self.fail()
+
+    def test_map_pow(self):
+        if not test_map_intrinsic(lambda x: x**-1.5):
+            self.fail()
+
+    def test_map_pown(self):
+        if not test_map_intrinsic(lambda x: x**4):
             self.fail()
 
     def test_map_reciprocal(self):
