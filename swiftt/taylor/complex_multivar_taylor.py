@@ -649,7 +649,7 @@ class ComplexMultivarTaylor(TaylorExpansAbstract):
             numpy.ndarray: coefficients corresponding to square.
 
         """
-        twice_coeff = 2. * coeff
+        twice_coeff = 2 * coeff
         pow2_coeff = coeff[0] * twice_coeff
         squared_terms = coeff[:len(square_ind)] ** 2
         pow2_coeff[0] = 0.
@@ -671,6 +671,9 @@ class ComplexMultivarTaylor(TaylorExpansAbstract):
         coeff = self.pow2_multivar(self._coeff, self.get_square_indices(), self.get_flat_table_mul(),
                                    self.get_indices_mul())
         return self.create_expansion_with_coeff(coeff)
+
+    def square(self) -> "ComplexMultivarTaylor":
+        return self.pow2()
 
     @staticmethod
     @njit(cache=True)
@@ -698,8 +701,8 @@ class ComplexMultivarTaylor(TaylorExpansAbstract):
         for i, (slice_index, el) in enumerate(zip(slices, coeff[2:]), 2):
             if i < len(square_ind):
                 new_coeff[square_ind[i]] -= el * new_coeff[i] * new_coeff[0]
-            new_coeff[table_mul[indices_mul[i - 1] + 1:indices_mul[i]]] -= (new_coeff[i] * coeff[1:slice_index] +
-                                                                            el * new_coeff[1:slice_index]) * new_coeff[0]
+            new_coeff[table_mul[indices_mul[i - 1] + 1:indices_mul[i]]] -= \
+                (new_coeff[i] * coeff[1:slice_index] + el * new_coeff[1:slice_index]) * new_coeff[0]
         return new_coeff
 
     def reciprocal(self) -> "ComplexMultivarTaylor":
@@ -733,9 +736,8 @@ class ComplexMultivarTaylor(TaylorExpansAbstract):
         for i, (slice_index, el2) in enumerate(zip(slices, other_coeff[2:]), 2):
             if i < len(square_ind):
                 new_coeff[square_ind[i]] -= el2 * new_coeff[i] / other_coeff[0]
-            new_coeff[table_mul[indices_mul[i - 1] + 1:indices_mul[i]]] -= (new_coeff[i] * other_coeff[1:slice_index] +
-                                                                            el2 * new_coeff[1:slice_index]) /\
-                                                                           other_coeff[0]
+            new_coeff[table_mul[indices_mul[i - 1] + 1:indices_mul[i]]] -= \
+                (new_coeff[i] * other_coeff[1:slice_index] + el2 * new_coeff[1:slice_index]) / other_coeff[0]
         return new_coeff
 
     def __truediv__(self, other: Union[Scalar, "ComplexMultivarTaylor"]) -> "ComplexMultivarTaylor":
@@ -775,19 +777,18 @@ class ComplexMultivarTaylor(TaylorExpansAbstract):
 
         """
         slices = indices_mul[2:] - indices_mul[1:-1]
-        factor = 1. / (2. * preprocessed_coeff[0])
+        factor = 1. / (2 * preprocessed_coeff[0])
         preprocessed_coeff[square_ind[1]] -= preprocessed_coeff[1]**2 * factor
         for i, slice_index in enumerate(slices, 2):
             if i < len(square_ind):
                 preprocessed_coeff[square_ind[i]] -= preprocessed_coeff[i]**2 * factor
-            preprocessed_coeff[table_mul[indices_mul[i - 1] + 1:indices_mul[i]]] -= preprocessed_coeff[i] * \
-                                                                                    preprocessed_coeff[1:slice_index] \
-                                                                                    / preprocessed_coeff[0]
+            preprocessed_coeff[table_mul[indices_mul[i - 1] + 1:indices_mul[i]]] -= \
+                preprocessed_coeff[i] * preprocessed_coeff[1:slice_index] / preprocessed_coeff[0]
         return preprocessed_coeff
 
     def sqrt(self) -> "ComplexMultivarTaylor":
         sqrt_cst = self._sqrt_cst(self._coeff[0])
-        preprocessed_coeff = self._coeff / (2. * sqrt_cst)
+        preprocessed_coeff = self._coeff / (2 * sqrt_cst)
         preprocessed_coeff[0] = sqrt_cst
         new_coeff = self.sqrt_multivar(preprocessed_coeff, self.get_square_indices(),
                                        self.get_flat_table_mul(), self.get_indices_mul())

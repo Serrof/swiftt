@@ -375,7 +375,7 @@ class ComplexTaylorMap(TaylorExpansAbstract, MapAbstract):
         """
 
         new_coeff = np.zeros((self._len, algebra_dim(self._n_var, self._order + 1)),
-                                 dtype=self._var_type)
+                             dtype=self._var_type)
         if self.is_univar():
             new_expansions = [self[0].__class__(self._order + 1, self[0].var_names)]
             new_coeff[:, 1:] = self._coeff / np.arange(1, self.order + 2)
@@ -824,8 +824,8 @@ class ComplexTaylorMap(TaylorExpansAbstract, MapAbstract):
         slices = indices_mul[2:] - indices_mul[1:-1]
 
         for i, (slice_index, el) in enumerate(zip(slices, other_coeff[2:]), 2):
-            multiplied_coeff[:, table_mul[indices_mul[i - 1] + 1:indices_mul[i]]] += np.outer(coeff_map[:, i], other_coeff[1:slice_index]) \
-                                                                                     + el * coeff_map[:, 1:slice_index]
+            multiplied_coeff[:, table_mul[indices_mul[i - 1] + 1:indices_mul[i]]] += \
+                np.outer(coeff_map[:, i], other_coeff[1:slice_index]) + el * coeff_map[:, 1:slice_index]
 
         return multiplied_coeff
 

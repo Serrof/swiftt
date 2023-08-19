@@ -106,6 +106,9 @@ class AlgebraicAbstract(metaclass=ABCMeta):
         """
         return self.__mul__(other)
 
+    def square(self) -> "AlgebraicAbstract":
+        return self * self
+
     def __neg__(self) -> "AlgebraicAbstract":
         """Method defining negation (additive inverse).
 

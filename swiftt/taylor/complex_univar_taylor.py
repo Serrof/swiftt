@@ -129,7 +129,7 @@ class ComplexUnivarTaylor(ComplexMultivarTaylor):
 
         """
 
-        twice_coeff = 2. * coeff
+        twice_coeff = 2 * coeff
         new_coeff = coeff[0] * twice_coeff
         squared_coeff = coeff[:half_order]**2
         new_coeff[0] = squared_coeff[0]
@@ -291,7 +291,7 @@ class ComplexUnivarTaylor(ComplexMultivarTaylor):
 
     def sqrt(self) -> "ComplexUnivarTaylor":
         first_term = self._sqrt_cst(self._coeff[0])  # this prevents from having the method static
-        preprocessed_coeff = self._coeff / (2. * first_term)
+        preprocessed_coeff = self._coeff / (2 * first_term)
         preprocessed_coeff[0] = first_term
         return self.create_expansion_with_coeff(self._sqrt_expansion(preprocessed_coeff))
 
@@ -308,7 +308,7 @@ class ComplexUnivarTaylor(ComplexMultivarTaylor):
             numpy.ndarray: coefficients corresponding to the square root of the expansion.
 
         """
-        factor = 2. * preprocessed_coeff[0]
+        factor = 2 * preprocessed_coeff[0]
         for i in range(1, preprocessed_coeff.shape[0]):
             preprocessed_coeff[i] -= preprocessed_coeff[1:i].dot(preprocessed_coeff[i-1:0:-1]) / factor
         return preprocessed_coeff

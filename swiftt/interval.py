@@ -138,6 +138,9 @@ class Interval(AlgebraicAbstract):
     def increasing_intrinsic(self, func: Callable) -> "Interval":
         return Interval(func(self.lb), func(self.ub))
 
+    def cbrt(self) -> "Interval":
+        return self.increasing_intrinsic(math.cbrt)
+
     def sqrt(self) -> "Interval":
         return self.increasing_intrinsic(math.sqrt)
 
