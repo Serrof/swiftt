@@ -272,7 +272,7 @@ class ComplexUnivarTaylor(ComplexMultivarTaylor):
     @staticmethod
     @njit(cache=True)
     def _log_expansion(coeff: np.ndarray, preprocessed_coeff: np.ndarray) -> np.ndarray:
-        """Method computing the coefficients of the natural logarithm of an expansion from their coefficients.
+        """Method computing the coefficients of the Napierian logarithm of an expansion from their coefficients.
         Uses (univariate) recursive formula from Neidinger 2013.
 
         Args:

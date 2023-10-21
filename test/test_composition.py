@@ -232,7 +232,7 @@ class TestComposition(unittest.TestCase):
         c = complex_map[1].copy()
         c.const = root2_nominal * root1_nominal
         delta = b ** 2 - 4. * c
-        sqrt_delta = sqrt(delta)
+        sqrt_delta = delta.sqrt()
 
         root1_formula = 0.5 * (sqrt_delta - b)
         root2_formula = (-0.5) * (b + sqrt_delta)

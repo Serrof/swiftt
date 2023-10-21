@@ -740,10 +740,10 @@ class TaylorExpansAbstract(AlgebraicAbstract, metaclass=ABCMeta):
         return expon * self._exp_cst(self.const)
 
     def log(self) -> "TaylorExpansAbstract":
-        """Natural logarithm of Taylor expansion object.
+        """Napierian logarithm of Taylor expansion object.
 
         Returns:
-            TaylorExpansAbstract: natural logarithm of Taylor expansion object.
+            TaylorExpansAbstract: Napierian logarithm of Taylor expansion object.
 
         """
         if self.is_trivial():

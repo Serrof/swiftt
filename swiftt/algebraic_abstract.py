@@ -193,7 +193,6 @@ class AlgebraicAbstract(metaclass=ABCMeta):
         """
         return other * self.reciprocal()
 
-    @abstractmethod
     def reciprocal(self) -> "AlgebraicAbstract":
         """Method defining the reciprocal a.k.a. multiplicative inverse (within the algebra).
 
@@ -201,7 +200,7 @@ class AlgebraicAbstract(metaclass=ABCMeta):
             AlgebraicAbstract: multiplicative inverse of object.
 
         """
-        raise NotImplementedError
+        raise self.__pow__(-1)
 
     def degrees(self) -> "AlgebraicAbstract":
         """
@@ -249,10 +248,10 @@ class AlgebraicAbstract(metaclass=ABCMeta):
 
     @abstractmethod
     def log(self) -> "AlgebraicAbstract":
-        """Natural logarithm of algebraic object.
+        """Napierian logarithm of algebraic object.
 
         Returns:
-            AlgebraicAbstract: natural logarithm of algebraic object.
+            AlgebraicAbstract: Napierian logarithm of algebraic object.
 
         """
         raise NotImplementedError

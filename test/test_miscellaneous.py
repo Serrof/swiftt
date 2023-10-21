@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 from swiftt.interval import Interval
 from swiftt.taylor import taylor_map, factory_taylor
-from swiftt.math_algebra import cos, sin, exp, sqrt
+from swiftt.math_algebra import exp
 
 
 tol_coeff = 1.e-12

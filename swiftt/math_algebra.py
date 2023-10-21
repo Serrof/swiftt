@@ -82,7 +82,7 @@ def scalar_inversion(func: Callable[[ComplexUnivarTaylor], ComplexUnivarTaylor],
 
 
 def sqrt(p: Union[AlgebraicAbstract, complex, float]) -> Union[AlgebraicAbstract, complex, float]:
-    """Taylor expansio- and interval--compatible version of the square root function.
+    """Taylor expansion- and interval--compatible version of the square root function.
     Wraps the math implementation for floats.
 
     Args:
@@ -140,14 +140,14 @@ def exp(p: Union[AlgebraicAbstract, complex, float]) -> Union[AlgebraicAbstract,
 
 
 def log(p: Union[AlgebraicAbstract, complex, float]) -> Union[AlgebraicAbstract, complex, float]:
-    """Taylor expansion- and interval-compatible version of the natural logarithm function.
+    """Taylor expansion- and interval-compatible version of the Napierian logarithm function.
     Wraps the math implementation for complex and floats.
 
     Args:
-         p (Union[AlgebraicAbstract, complex, float]): object whose natural logarithm needs to be computed.
+         p (Union[AlgebraicAbstract, complex, float]): object whose Napierian logarithm needs to be computed.
 
     Returns:
-        Union[AlgebraicAbstract, complex, float]: natural logarithm of input.
+        Union[AlgebraicAbstract, complex, float]: Napierian logarithm of input.
 
     """
     if isinstance(p, AlgebraicAbstract):

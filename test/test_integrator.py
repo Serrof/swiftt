@@ -87,30 +87,6 @@ class TestIntegrator(unittest.TestCase):
                                                                                dtype=real_multivar_taylor.RealMultivarTaylor), 2,
                                                          event_func=lambda t, x: t > 1000., tol_event=0.1)):
             self.fail()
-    #
-    # def test_event_detec(self):
-    #
-    #     t0 = 0.
-    #     tf = 10.
-    #     x0 = np.array([0.5, 1.])
-    #     n_steps = int((tf - t0) / 0.01)
-    #     tol_event = 0.01
-    #
-    #     def fun(t, x):
-    #         return np.array([x[1], cos(x[0])])
-    #
-    #     def event(t, x):
-    #         return x[0] < 0.
-    #
-    #     inteRKF45 = integrators.RKF45(fun, 2, event_func=event, tol_event=tol_event)
-    #     statesRKF45, timesRKF45 = inteRKF45.integrate(t0, tf, x0, n_steps, keep_history=False)
-    #
-    #     inteTaylor = integrators_algebra.TaylorVarsize(fun, order=4, dim_state=2, event_func=event,
-    #                                                    tol_event=tol_event)
-    #     statesTaylor, timesTaylor = inteTaylor.integrate(t0, tf, x0, n_steps, keep_history=False)
-    #
-    #     if not np.allclose(timesRKF45[-1], timesTaylor[-1], atol=1.e-2, rtol=1.e-3):
-    #         self.fail()
 
 
 if __name__ == '__main__':
