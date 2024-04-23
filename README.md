@@ -72,9 +72,8 @@ Multiplication between Taylor expansions consists in forming the truncated produ
 It is the bottleneck of the whole TDA, as it is a building brick for many other things 
 and unlike addition for example, it does not exhibit linear complexity w.r.t. the number of normalized derivatives. 
 For this reason, *swiftt* uses a look-up table and leverages on Just In Time compilation via Numba for performance. 
-As for division, it
 
-Once some basic algebraic operators are available, intrinsic, scalar-valued functions can be dealt with, including divisio itself. 
+Once some basic algebraic operators are available, intrinsic, scalar-valued functions can be dealt with, including division itself. 
 A brute force approach is to purely overload operators on their "standard" code e.g. with floats, when applicable. 
 A usually more effficient way is to use the composition (from the left) rule with univariate expansions,
 (compatible in practise with a Horner-like scheme), as their Maclaurin series (Taylor series around zero) are well known. 
